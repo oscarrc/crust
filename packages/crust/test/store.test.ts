@@ -307,6 +307,45 @@ describe('expanded primitive', () => {
     toast('plain', { duration: Infinity });
     expect(toastStore.getSnapshot()[0]!.expanded).toBeUndefined();
   });
+
+  test('expandAfter auto-expands after N ms and restarts the dismiss timer', () => {
+    const id = toast('m', { title: 't', duration: 4000, expandAfter: 2000 });
+    vi.advanceTimersByTime(1999);
+    expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ id, expanded: true });
+    // dismiss timer restarted at the 2000ms mark: full 4000 remain
+    vi.advanceTimersByTime(3999);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('expandAfter is cancelled by dismissal', () => {
+    const id = toast('m', { title: 't', duration: Infinity, expandAfter: 1000 });
+    toast.dismiss(id);
+    const listener = vi.fn();
+    const unsubscribe = toastStore.subscribe(listener);
+    vi.advanceTimersByTime(5000);
+    expect(listener).not.toHaveBeenCalled();
+    unsubscribe();
+  });
+
+  test('expandAfter starts when a queued toast is promoted, not when added', () => {
+    const pinned = Array.from({ length: 5 }, (_, i) => toast(`p${i}`, { duration: Infinity }));
+    const queued = toast('m', { title: 't', duration: Infinity, expandAfter: 1000 });
+    vi.advanceTimersByTime(10_000); // sits in queue well past expandAfter
+    toast.dismiss(pinned[0]!);
+    expect(toastStore.getSnapshot().find((t) => t.id === queued)!.expanded).not.toBe(true);
+    vi.advanceTimersByTime(1000);
+    expect(toastStore.getSnapshot().find((t) => t.id === queued)!.expanded).toBe(true);
+  });
+
+  test('expandAfter without a title is ignored', () => {
+    toast('no title here', { duration: Infinity, expandAfter: 500 });
+    vi.advanceTimersByTime(5000);
+    expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
+  });
 });
 
 describe('subscription & snapshots', () => {

@@ -41,6 +41,7 @@ interface StoreState {
   queue: Toast[];
   listeners: Set<(toasts: readonly Toast[]) => void>;
   timers: Map<string, TimerEntry>;
+  expandTimers: Map<string, ReturnType<typeof setTimeout>>;
   maxVisible: number;
   seq: number;
 }
@@ -54,9 +55,12 @@ const state: StoreState = (globalContainer[STORE_KEY] ??= {
   queue: [],
   listeners: new Set(),
   timers: new Map(),
+  expandTimers: new Map(),
   maxVisible: 5,
   seq: 0
 });
+// Migration guard: an older module copy may have created the singleton without this map.
+state.expandTimers ??= new Map();
 
 const emit = () => {
   for (const listener of state.listeners) listener(state.toasts);
@@ -77,11 +81,33 @@ const clearTimer = (id: string) => {
   state.timers.delete(id);
 };
 
+// `update` is defined later in the file — fine; these helpers are only
+// invoked at runtime, after module evaluation is complete.
+const scheduleExpand = (toast: Toast) => {
+  // Only meaningful when there is a hidden message panel to reveal.
+  if (!toast.title || toast.expandAfter === undefined) return;
+  if (!Number.isFinite(toast.expandAfter)) return;
+  state.expandTimers.set(
+    toast.id,
+    setTimeout(() => {
+      state.expandTimers.delete(toast.id);
+      update(toast.id, { expanded: true });
+    }, toast.expandAfter)
+  );
+};
+
+const clearExpandTimer = (id: string) => {
+  const timeoutId = state.expandTimers.get(id);
+  if (timeoutId != null) clearTimeout(timeoutId);
+  state.expandTimers.delete(id);
+};
+
 const promote = () => {
   while (state.queue.length > 0 && state.toasts.length < state.maxVisible) {
     const next = state.queue.shift()!;
     state.toasts = [...state.toasts, next];
     startTimer(next);
+    scheduleExpand(next);
   }
 };
 
@@ -104,6 +130,7 @@ const add = (message: string, options?: ToastOptions): string => {
   if (state.toasts.length < state.maxVisible) {
     state.toasts = [...state.toasts, next];
     startTimer(next);
+    scheduleExpand(next);
     emit();
   } else {
     // Queued toasts get their timer on promotion — they must not expire unseen.
@@ -114,6 +141,7 @@ const add = (message: string, options?: ToastOptions): string => {
 
 const remove = (id: string) => {
   clearTimer(id);
+  clearExpandTimer(id);
   const queuedAt = state.queue.findIndex((t) => t.id === id);
   if (queuedAt !== -1) {
     state.queue.splice(queuedAt, 1);
@@ -127,6 +155,7 @@ const remove = (id: string) => {
 
 const removeAll = () => {
   for (const id of [...state.timers.keys()]) clearTimer(id);
+  for (const id of [...state.expandTimers.keys()]) clearExpandTimer(id);
   state.queue.length = 0;
   if (state.toasts.length === 0) return;
   state.toasts = [];
