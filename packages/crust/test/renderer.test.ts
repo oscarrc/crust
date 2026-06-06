@@ -186,6 +186,17 @@ describe('store-driven expansion', () => {
     expect(el.classList.contains('crust-expanded')).toBe(true);
     expect(el.dataset.pinned).toBeTruthy();
   });
+
+  test('a user-collapsed toast stays collapsed through unrelated updates', () => {
+    const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    el.click(); // user collapses the store-expanded toast
+    expect(el.classList.contains('crust-expanded')).toBe(false);
+    toast.update(id, { message: 'new content' });
+    const updated = document.querySelector<HTMLElement>('.crust-toast')!;
+    expect(updated.classList.contains('crust-expanded')).toBe(false);
+    expect(updated.dataset.pinned).toBeFalsy();
+  });
 });
 
 describe('warning and loading defaults', () => {

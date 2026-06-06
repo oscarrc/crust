@@ -422,13 +422,6 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     el.className = `crust-toast crust-${item.type}${expandable ? ' crust-expandable' : ''}`;
     el.dataset.id = item.id;
 
-    if (expandable && item.expanded) {
-      // Store-driven expansion behaves like click-to-pin: it stays open
-      // until the user collapses or dismisses it.
-      el.classList.add('crust-expanded');
-      el.dataset.pinned = '1';
-    }
-
     const capsule = document.createElement('div');
     capsule.className = 'crust-capsule';
 
@@ -529,19 +522,34 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     return { cell, inner, el, item };
   };
 
+  const applyExpansion = (el: HTMLElement) => {
+    if (!el.classList.contains('crust-expandable')) return;
+    // Style flush first so the morph transitions exactly like a hover.
+    void el.offsetHeight;
+    el.classList.add('crust-expanded');
+    el.dataset.pinned = '1';
+  };
+
   const updateCell = (entry: CellEntry, item: Toast) => {
     // Content changed (toast.update / toast.promise): rebuild the toast
     // element inside the same cell, carrying interaction state over.
     const fresh = buildToastEl(item);
     if (fresh.classList.contains('crust-expandable')) {
-      if (entry.el.classList.contains('crust-expanded')) {
-        fresh.classList.add('crust-expanded');
-      }
+      // The live element's gesture state is authoritative across rebuilds —
+      // including a user's collapse of a previously store-expanded toast.
+      fresh.classList.toggle(
+        'crust-expanded',
+        entry.el.classList.contains('crust-expanded')
+      );
       if (entry.el.dataset.pinned) fresh.dataset.pinned = entry.el.dataset.pinned;
     }
+    // Expansion is a command edge: only a CHANGE to expanded:true forces the
+    // panel open (re-issuing it on an already-expanded item is not an edge).
+    const newlyExpanded = item.expanded === true && entry.item.expanded !== true;
     entry.el.replaceWith(fresh);
     entry.el = fresh;
     entry.item = item;
+    if (newlyExpanded) applyExpansion(fresh);
   };
 
   const beginExit = (id: string, entry: CellEntry) => {
@@ -590,6 +598,8 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
       // Force a style flush so the entrance transition reliably fires.
       void entry.cell.offsetHeight;
       entry.cell.classList.add('crust-shown');
+      // Arrive-expanded toasts morph open as part of the same entrance.
+      if (item.expanded === true) applyExpansion(entry.el);
       if (delay > 0) {
         setTimeout(
           () => entry.cell.style.removeProperty('--crust-stagger'),

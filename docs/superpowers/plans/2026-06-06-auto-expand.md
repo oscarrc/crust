@@ -370,6 +370,22 @@ git commit -m "feat(crust): render store-driven expansion as pinned-open"
 
 ---
 
+### Task 5 amendment (user request, mid-execution): interactive position playground
+
+The docs playground additionally gains a **Positions** section: a miniature
+viewport map (rounded rect, 16:9) with six tiny toast-shaped buttons placed
+where toasts would anchor (`top-left` … `bottom-right`). Clicking one
+remounts the toaster at that position (`mountToaster()` → `.unmount()` →
+`mountToaster({ position })` — idempotent first call returns the live
+handle) and fires a confirmation toast. Active position shows `aria-pressed`
++ filled style. Styled to the warm-paper design context (`.impeccable.md`).
+
+Prerequisite library fix (TDD, separate commit): `unmount()` must only null
+the module-level `mounted` singleton **if it is still the current handle**
+— otherwise a stale handle (e.g. the React island's cleanup after the
+playground has remounted) would orphan the active toaster and allow
+duplicate regions.
+
 ### Task 5: Docs, playground, README
 
 **Files:**
