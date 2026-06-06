@@ -66,6 +66,25 @@ describe('mountToaster', () => {
     toaster = mountToaster();
     expect(toastEls()).toHaveLength(1);
   });
+
+  test('re-adopts the region after an Astro view-transition swap', () => {
+    toaster = mountToaster();
+    toast('survivor', { duration: 0 });
+    // Simulate ClientRouter: the incoming body never contains the
+    // runtime-created region, so the swap drops it.
+    region()!.remove();
+    document.dispatchEvent(new Event('astro:after-swap'));
+    expect(region()).toBeTruthy();
+    expect(toastEls()).toHaveLength(1);
+  });
+
+  test('unmount stops re-adopting on swap', () => {
+    toaster = mountToaster();
+    toaster.unmount();
+    toaster = undefined;
+    document.dispatchEvent(new Event('astro:after-swap'));
+    expect(region()).toBeNull();
+  });
 });
 
 describe('toast rendering', () => {

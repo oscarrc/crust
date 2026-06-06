@@ -2,7 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import { Playground } from "../components/Playground";
 
-const base = import.meta.env.BASE_URL;
+// BASE_URL has no trailing slash by default — normalize so `${base}docs/` works.
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <Layout>
@@ -15,7 +16,7 @@ const base = import.meta.env.BASE_URL;
         into a card as a single continuous surface.
       </p>
       <div class="hero-actions">
-        <button id="hero-bake" class="btn btn-primary">Bake a toast</button>
+        <button class="btn btn-primary" data-bake="success">Bake a toast</button>
         <a class="btn" href={`${base}docs/`}>Read the docs</a>
       </div>
     </section>
@@ -43,8 +44,8 @@ const base = import.meta.env.BASE_URL;
 
       <p class="section-note">
         Now navigate to the <a href={`${base}docs/`}>docs page</a> with a toast still
-        up — it survives the page transition. That's
-        <code>transition:persist</code> doing exactly what it promises.
+        up — it survives the page transition. Crust re-adopts its toaster
+        across Astro's view-transition swaps, timers and all.
       </p>
     </section>
 
@@ -165,17 +166,15 @@ const base = import.meta.env.BASE_URL;
     dismiss: () => toast.dismiss(),
   };
 
-  document
-    .getElementById("hero-bake")
-    ?.addEventListener("click", bakes.success!);
-  document
-    .getElementById("vanilla-tray")
-    ?.addEventListener("click", (event) => {
-      const button = (event.target as HTMLElement).closest<HTMLElement>(
-        "[data-bake]",
-      );
-      if (button) bakes[button.dataset.bake!]?.();
-    });
+  // Delegate at the document level: this script runs once per full page
+  // load, and ClientRouter swaps the <body> on navigation — listeners bound
+  // to specific elements would die on the first round trip.
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>(
+      "[data-bake]",
+    );
+    if (button) bakes[button.dataset.bake!]?.();
+  });
 
   document.getElementById("position-map")?.addEventListener("click", (event) => {
     const dot = (event.target as HTMLElement).closest<HTMLElement>("[data-pos]");

@@ -406,6 +406,15 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   region.setAttribute('aria-label', 'Notifications');
   document.body.appendChild(region);
 
+  // Astro's ClientRouter swaps <body> on navigation; the region is created at
+  // runtime so the incoming document never contains it. Re-adopt it after the
+  // swap — live toasts (DOM, timers, pinned state) carry straight across.
+  // Outside Astro the event never fires, so this is inert.
+  const readopt = () => {
+    if (!region.isConnected) document.body.appendChild(region);
+  };
+  document.addEventListener('astro:after-swap', readopt);
+
   interface CellEntry {
     cell: HTMLElement;
     inner: HTMLElement;
@@ -641,6 +650,7 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   const handle: ToasterHandle = {
     unmount: () => {
       unsubscribe();
+      document.removeEventListener('astro:after-swap', readopt);
       region.remove();
       cells.clear();
       // A stale handle (kept across an unmount/remount cycle) must not
