@@ -115,6 +115,8 @@ toast.promise(save(), {                           // loading → success/error
   success: (v) => `Saved ${v.name}`,
   error: 'Save failed'
 });
+toast('Read me', { title: 'Hi', expandAfter: 2000 }); // opens itself after 2s
+// toast.promise(…, { expandOnSettle: true }) opens the outcome
 
 toast.dismiss(id);  // one
 toast.dismiss();    // all, queue included

@@ -13,6 +13,7 @@ Returns the toast's `id`.
 | `type`     | `'success' \| 'error' \| 'info' \| 'warning' \| 'loading'` | `'info'` | Picks the icon and its color |
 | `duration` | `number`                          | `4000`   | ms. `Infinity` (or `0`) never auto-dismisses     |
 | `icon`     | `string \| Element \| () => Element \| null` | per type | Overrides the icon; `null` hides it   |
+| `expandAfter` | `number` | — | ms after becoming visible until the toast auto-expands (needs `title`); restarts the dismiss timer when it fires |
 
 ### Shorthands
 
@@ -34,6 +35,9 @@ const id = toast.loading('Uploading…');
 toast.update(id, { message: 'Uploaded', type: 'success', duration: 4000 });
 ```
 
+Patching `expanded: true` opens the message panel (pinned) and restarts the
+dismiss timer — it's the primitive under `expandAfter` and `expandOnSettle`.
+
 ### Promises
 
 Sugar over `loading` + `update`: shows a spinner toast, then morphs it into
@@ -45,8 +49,13 @@ toast.promise(saveDraft(), {
   loading: 'Saving draft…',
   success: (draft) => `Saved “${draft.title}”`,
   error: (e) => `Save failed: ${(e as Error).message}`
-});
+}, { expandOnSettle: true });
 ```
+
+With `expandOnSettle`, the outcome arrives with its message panel already
+open — and the fresh duration gives the reader the full time to read it.
+Note it only has a visible effect when the outcome content carries a
+`title` (title-less toasts show their whole message in the capsule).
 
 ### Dismissing
 
