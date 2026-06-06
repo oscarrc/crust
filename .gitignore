@@ -3,3 +3,4 @@ dist/
 .astro/
 *.log
 .DS_Store
+packages/crust/README.md

@@ -10,7 +10,7 @@ Most toast libraries are bloated white bread. They force you into wrapper fatigu
 
 **Crust is different.** The renderer is vanilla DOM — a React-free Astro site is a first-class citizen, and React gets a thin, concurrent-safe bridge on top. Warm matte surfaces, a capsule that grows into a card as one continuous surface, and rock-solid defaults. Take it or leave it — just like the crust.
 
-**[Docs & playground →](https://oscarrc.github.io/crust)**
+**[Docs & playground →](https://crust.oscarrc.me)**
 
 ---
 
@@ -61,7 +61,7 @@ toast.promise(saveDraft(), {
 }, { expandOnSettle: true });
 ```
 
-That's the whole setup. For React islands, view transitions, theming, and the rest, read on — or head to the **[docs & playground](https://oscarrc.github.io/crust)**.
+That's the whole setup. For React islands, view transitions, theming, and the rest, read on — or head to the **[docs & playground](https://crust.oscarrc.me)**.
 
 ## Usage
 
@@ -156,7 +156,7 @@ mountToaster({ position: 'bottom-right', maxVisible: 5, icons: { … } });
 - `duration` defaults to **4000ms**; `Infinity` (or `0`) means persistent.
 - A toast with a `title` morphs open on hover/focus/tap to reveal its message; the timer pauses while you read.
 - Icons accept an SVG string, an `Element`, or a factory — [`lucide`](https://lucide.dev) and `lucide-static` work out of the box (`lucide-react` doesn't; the renderer isn't React).
-- Theme everything via `--crust-*` custom properties — see the [theming docs](https://oscarrc.github.io/crust/docs/theming/).
+- Theme everything via `--crust-*` custom properties — see the [theming docs](https://crust.oscarrc.me/docs/theming/).
 
 ## Non-goals
 

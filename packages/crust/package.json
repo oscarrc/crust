@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/oscarrc/crust.git"
   },
-  "homepage": "https://oscarrc.github.io/crust",
+  "homepage": "https://crust.oscarrc.me",
   "keywords": [
     "toast",
     "notifications",
@@ -35,6 +35,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
+    "prepack": "cp ../../README.md ./README.md",
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
