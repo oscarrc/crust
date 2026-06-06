@@ -1,0 +1,63 @@
+{
+  "name": "@oscarrc/crust",
+  "version": "0.0.1",
+  "description": "Don't throw the crust. An opinionated, crisp toast library built natively for Astro and React.",
+  "license": "MIT",
+  "author": "Oscar Rey",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oscarrc/crust.git"
+  },
+  "homepage": "https://oscarrc.github.io/crust",
+  "keywords": [
+    "toast",
+    "notifications",
+    "astro",
+    "react",
+    "vanilla"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./vanilla": {
+      "types": "./dist/vanilla.d.ts",
+      "import": "./dist/vanilla.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "check:pkg": "publint && attw --pack . --profile esm-only"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.3",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.16",
+    "happy-dom": "^20.10.1",
+    "publint": "^0.3.21",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}
