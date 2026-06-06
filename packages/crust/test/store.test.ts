@@ -280,6 +280,33 @@ describe('expanded primitive', () => {
     vi.advanceTimersByTime(1);
     expect(toastStore.getSnapshot()).toHaveLength(0);
   });
+
+  test('timer restart while paused keeps the toast paused with the fresh duration', () => {
+    const id = toast('m', { title: 't', duration: 4000 });
+    vi.advanceTimersByTime(3000);
+    toastStore.pause(id); // hover
+    toast.update(id, { expanded: true });
+    vi.advanceTimersByTime(60_000); // still hovered — must not dismiss
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    toastStore.resume(id); // mouseleave
+    vi.advanceTimersByTime(3999);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('update(id, { expanded: false }) does not restart the dismiss timer', () => {
+    const id = toast('m', { title: 't', duration: 4000 });
+    vi.advanceTimersByTime(3900);
+    toast.update(id, { expanded: false });
+    vi.advanceTimersByTime(100);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('expanded is not set by default', () => {
+    toast('plain', { duration: Infinity });
+    expect(toastStore.getSnapshot()[0]!.expanded).toBeUndefined();
+  });
 });
 
 describe('subscription & snapshots', () => {

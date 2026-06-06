@@ -158,8 +158,15 @@ const update = (id: string, patch: ToastPatch) => {
   // A new duration — or a programmatic expansion (new content just
   // appeared, the reader gets the full duration again) — restarts the clock.
   if (patch.duration !== undefined || patch.expanded === true) {
+    const existing = state.timers.get(id);
+    const wasPaused = existing !== undefined && existing.timeoutId == null;
     clearTimer(id);
-    startTimer(next);
+    if (wasPaused && Number.isFinite(next.duration)) {
+      // Stay paused; resume() will run the fresh duration in full.
+      state.timers.set(id, { timeoutId: null, deadline: 0, remaining: next.duration });
+    } else {
+      startTimer(next);
+    }
   }
   emit();
 };
