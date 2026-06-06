@@ -1,0 +1,280 @@
+/* ==========================================================================
+   Crust — warm matte paper toasts.
+   One surface, growing. Color is the 10%. Nothing waits.
+   Every token below is overridable from the host site.
+   ========================================================================== */
+
+.crust-region {
+  /* Surfaces — warm-tinted neutrals (hue ~75), fully opaque. No glass. */
+  --crust-surface: oklch(0.98 0.005 75);
+  --crust-ink: oklch(0.28 0.012 75);
+  --crust-ink-muted: oklch(0.5 0.012 75);
+  --crust-border: oklch(0.89 0.01 75);
+  --crust-shadow:
+    0 1px 2px oklch(0.2 0.01 75 / 0.05),
+    0 6px 16px -4px oklch(0.2 0.01 75 / 0.1);
+
+  /* Semantic color lives only in the icons. */
+  --crust-success: oklch(0.55 0.12 150);
+  --crust-error: oklch(0.55 0.15 30);
+  --crust-info: oklch(0.55 0.1 250);
+
+  /* Shape & motion */
+  --crust-radius: 10px;
+  --crust-width: 360px;
+  --crust-offset: 16px;
+  --crust-z: 9999;
+  --crust-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --crust-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --crust-dur-in: 320ms;
+  --crust-dur-morph: 280ms;
+  --crust-dur-out: 200ms;
+
+  position: fixed;
+  z-index: var(--crust-z);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 2 * var(--crust-offset));
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .crust-region {
+    --crust-surface: oklch(0.24 0.008 75);
+    --crust-ink: oklch(0.92 0.008 75);
+    --crust-ink-muted: oklch(0.68 0.01 75);
+    --crust-border: oklch(0.33 0.01 75);
+    --crust-shadow:
+      0 1px 2px oklch(0 0 0 / 0.3),
+      0 6px 16px -4px oklch(0 0 0 / 0.45);
+    --crust-success: oklch(0.72 0.13 150);
+    --crust-error: oklch(0.7 0.16 30);
+    --crust-info: oklch(0.72 0.11 250);
+  }
+}
+
+/* Positions ---------------------------------------------------------- */
+
+.crust-pos-bottom-right  { bottom: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
+.crust-pos-bottom-left   { bottom: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
+.crust-pos-bottom-center { bottom: var(--crust-offset); left: 50%; transform: translateX(-50%); align-items: center; }
+.crust-pos-top-right     { top: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
+.crust-pos-top-left      { top: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
+.crust-pos-top-center    { top: var(--crust-offset); left: 50%; transform: translateX(-50%); align-items: center; }
+
+/* Cell: a grid row that grows from 0fr — stack reflow comes free ------ */
+
+.crust-cell {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--crust-dur-in) var(--crust-ease);
+  transition-delay: var(--crust-stagger, 0ms);
+}
+
+.crust-cell.crust-shown {
+  grid-template-rows: 1fr;
+}
+
+.crust-cell[data-leaving] {
+  transition-duration: var(--crust-dur-out);
+  transition-timing-function: var(--crust-ease-exit);
+}
+
+.crust-cell-inner {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  /* Breathing room so the soft shadow isn't clipped; bottom edge doubles
+     as the stack gap. */
+  padding: 8px 12px;
+  margin: -4px -12px;
+}
+
+.crust-pos-bottom-right .crust-cell-inner,
+.crust-pos-top-right .crust-cell-inner { justify-content: flex-end; }
+.crust-pos-bottom-center .crust-cell-inner,
+.crust-pos-top-center .crust-cell-inner { justify-content: center; }
+
+/* Toast: one warm, opaque surface ------------------------------------ */
+
+.crust-toast {
+  pointer-events: auto;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(var(--crust-width), calc(100vw - 2 * var(--crust-offset)));
+  interpolate-size: allow-keywords; /* width morph where supported */
+  background: var(--crust-surface);
+  color: var(--crust-ink);
+  border: 1px solid var(--crust-border);
+  border-radius: var(--crust-radius); /* constant across states — one surface */
+  box-shadow: var(--crust-shadow);
+  font: inherit;
+  margin: 4px 0;
+
+  opacity: 0;
+  transform: translateY(14px) scale(0.97);
+  transition:
+    transform var(--crust-dur-in) var(--crust-ease),
+    opacity var(--crust-dur-in) var(--crust-ease),
+    width var(--crust-dur-morph) var(--crust-ease);
+  transition-delay: var(--crust-stagger, 0ms);
+}
+
+.crust-pos-top-right .crust-toast,
+.crust-pos-top-left .crust-toast,
+.crust-pos-top-center .crust-toast {
+  transform: translateY(-14px) scale(0.97);
+}
+
+.crust-shown .crust-toast {
+  opacity: 1;
+  transform: none;
+}
+
+.crust-toast.crust-expandable {
+  cursor: pointer;
+}
+
+.crust-toast.crust-expanded {
+  width: var(--crust-width);
+}
+
+/* Exit: faster than entrance, gently accelerating away */
+.crust-shown .crust-toast.crust-leaving {
+  opacity: 0;
+  transform: translateY(6px) scale(0.97);
+  transition:
+    transform var(--crust-dur-out) var(--crust-ease-exit),
+    opacity var(--crust-dur-out) var(--crust-ease-exit);
+}
+
+.crust-pos-top-right .crust-shown .crust-toast.crust-leaving,
+.crust-pos-top-left .crust-shown .crust-toast.crust-leaving,
+.crust-pos-top-center .crust-shown .crust-toast.crust-leaving {
+  transform: translateY(-6px) scale(0.97);
+}
+
+/* Capsule row --------------------------------------------------------- */
+
+.crust-capsule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+}
+
+.crust-icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.crust-success .crust-icon { color: var(--crust-success); }
+.crust-error .crust-icon   { color: var(--crust-error); }
+.crust-info .crust-icon    { color: var(--crust-info); }
+
+/* Stroke draw-in: capsule lands first, then the mark draws itself. */
+.crust-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: crust-draw 240ms var(--crust-ease) 80ms forwards;
+}
+
+@keyframes crust-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.crust-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crust-dismiss {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -4px -4px -4px 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--crust-ink-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms var(--crust-ease), background-color 150ms var(--crust-ease);
+}
+
+.crust-toast:hover .crust-dismiss,
+.crust-toast.crust-expanded .crust-dismiss,
+.crust-dismiss:focus-visible {
+  opacity: 1;
+}
+
+.crust-dismiss:hover {
+  background: oklch(from var(--crust-ink) l c h / 0.08);
+}
+
+.crust-dismiss:focus-visible {
+  outline: 2px solid var(--crust-info);
+  outline-offset: 1px;
+}
+
+/* Body: the message region grows inside the same surface -------------- */
+
+.crust-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--crust-dur-morph) var(--crust-ease);
+}
+
+.crust-expanded .crust-body {
+  grid-template-rows: 1fr;
+}
+
+.crust-body-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.crust-msg {
+  margin: 0;
+  padding: 0 14px 12px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--crust-ink-muted);
+  max-width: 65ch;
+}
+
+/* Reduced motion: a first-class theme, not a fallback ----------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .crust-cell,
+  .crust-toast,
+  .crust-body {
+    transition-duration: 1ms;
+  }
+
+  .crust-toast,
+  .crust-pos-top-right .crust-toast,
+  .crust-pos-top-left .crust-toast,
+  .crust-pos-top-center .crust-toast {
+    transform: none;
+    transition: opacity 150ms linear;
+  }
+
+  .crust-shown .crust-toast.crust-leaving {
+    transform: none;
+    transition: opacity 150ms linear;
+  }
+
+  .crust-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
