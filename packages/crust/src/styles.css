@@ -211,9 +211,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  align-self: flex-start;
   width: 24px;
   height: 24px;
-  margin: -4px -4px -4px 2px;
+  /* margin-left: auto pins it to the toast's top-right when expanded;
+     in the compact capsule there's no slack, so nothing moves. */
+  margin: -4px -4px -4px auto;
   padding: 0;
   border: 0;
   border-radius: 6px;
