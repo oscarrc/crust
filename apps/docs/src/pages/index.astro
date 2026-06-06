@@ -33,6 +33,7 @@ const base = import.meta.env.BASE_URL;
         <button class="btn" data-bake="warning">Warning</button>
         <button class="btn" data-bake="promise">Promise (2s bake)</button>
         <button class="btn" data-bake="expand">Expandable (hover it)</button>
+        <button class="btn" data-bake="expand-after">Expand after 2s</button>
         <button class="btn" data-bake="persistent">Persistent</button>
         <button class="btn" data-bake="custom-icon">Custom lucide icon</button>
         <button class="btn" data-bake="spam">Spam ×10</button>
@@ -46,6 +47,22 @@ const base = import.meta.env.BASE_URL;
         up — it survives the page transition. That's
         <code>transition:persist</code> doing exactly what it promises.
       </p>
+    </section>
+
+    <section class="positions">
+      <h2>Positions</h2>
+      <p class="section-note">
+        Six anchors, one option. Pick where the toaster lives — this remounts
+        it live via <code>mountToaster(&#123; position &#125;)</code>.
+      </p>
+      <div class="viewport-map" id="position-map" role="group" aria-label="Toaster position">
+        <button class="pos-dot" data-pos="top-left" aria-label="Top left" aria-pressed="false"></button>
+        <button class="pos-dot" data-pos="top-center" aria-label="Top center" aria-pressed="false"></button>
+        <button class="pos-dot" data-pos="top-right" aria-label="Top right" aria-pressed="false"></button>
+        <button class="pos-dot" data-pos="bottom-left" aria-label="Bottom left" aria-pressed="false"></button>
+        <button class="pos-dot" data-pos="bottom-center" aria-label="Bottom center" aria-pressed="false"></button>
+        <button class="pos-dot" data-pos="bottom-right" aria-label="Bottom right" aria-pressed="true"></button>
+      </div>
     </section>
 
     <section class="why">
@@ -91,7 +108,7 @@ const base = import.meta.env.BASE_URL;
 </Layout>
 
 <script>
-  import { toast } from "@oscarrc/crust/vanilla";
+  import { toast, mountToaster, type ToasterPosition } from "@oscarrc/crust/vanilla";
   import { createElement, Croissant } from "lucide";
 
   const bakes: Record<string, () => void> = {
@@ -124,6 +141,7 @@ const base = import.meta.env.BASE_URL;
             title: "Bake failed",
           }),
         },
+        { expandOnSettle: true },
       ),
     expand: () =>
       toast(
@@ -133,6 +151,11 @@ const base = import.meta.env.BASE_URL;
           type: "info",
           duration: 10_000,
         },
+      ),
+    "expand-after": () =>
+      toast(
+        "Two seconds after landing, this toast opens itself — and the dismiss timer starts over.",
+        { title: "Patience", type: "info", expandAfter: 2000 },
       ),
     persistent: () =>
       toast("This one stays until you dismiss it.", {
@@ -163,6 +186,20 @@ const base = import.meta.env.BASE_URL;
       );
       if (button) bakes[button.dataset.bake!]?.();
     });
+
+  document.getElementById("position-map")?.addEventListener("click", (event) => {
+    const dot = (event.target as HTMLElement).closest<HTMLElement>("[data-pos]");
+    if (!dot) return;
+    const position = dot.dataset.pos as ToasterPosition;
+    mountToaster().unmount(); // idempotent call returns the live handle
+    mountToaster({ position });
+    document
+      .querySelectorAll("#position-map [data-pos]")
+      .forEach((d) => d.setAttribute("aria-pressed", String(d === dot)));
+    toast.success(`Now baking at ${position.replace("-", " ")}.`, {
+      title: "Position",
+    });
+  });
 </script>
 
 <style>
@@ -246,4 +283,42 @@ const base = import.meta.env.BASE_URL;
     color: var(--ink-soft);
     font-size: 0.95rem;
   }
+
+  .viewport-map {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    max-width: 380px;
+    margin-top: var(--space-md);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper-raised);
+  }
+
+  .pos-dot {
+    position: absolute;
+    width: 26px;
+    height: 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper);
+    cursor: pointer;
+    transition: border-color 120ms, background-color 120ms, transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .pos-dot:hover {
+    border-color: var(--crumb);
+    transform: scale(1.15);
+  }
+
+  .pos-dot[aria-pressed="true"] {
+    background: var(--crumb);
+    border-color: var(--crumb);
+  }
+
+  .pos-dot[data-pos="top-left"] { top: 10px; left: 10px; }
+  .pos-dot[data-pos="top-center"] { top: 10px; left: 50%; translate: -50% 0; }
+  .pos-dot[data-pos="top-right"] { top: 10px; right: 10px; }
+  .pos-dot[data-pos="bottom-left"] { bottom: 10px; left: 10px; }
+  .pos-dot[data-pos="bottom-center"] { bottom: 10px; left: 50%; translate: -50% 0; }
+  .pos-dot[data-pos="bottom-right"] { bottom: 10px; right: 10px; }
 </style>
