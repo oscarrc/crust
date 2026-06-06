@@ -8,6 +8,9 @@ export default defineConfig({
   site: 'https://oscarrc.github.io',
   base: '/crust',
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     plugins: [tailwindcss()]
   },
   fonts: [

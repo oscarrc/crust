@@ -49,7 +49,7 @@ Key design points that span files:
 
 - **Singleton store on `globalThis`** (`Symbol.for('crust.store')`): defends against two module copies (duplicate installs, Astro script bundles + React island bundle) splitting state. Any new top-level store field needs a migration guard (`state.field ??= ...`) since an older module copy may have created the singleton without it.
 - **Store vs renderer split**: the store holds `toasts` (visible) + `queue` (overflow past `maxVisible`); queued toasts get their dismiss timer only on promotion so they can't expire unseen. The renderer subscribes and diffs by toast id against a `cells` map — it never re-renders the whole stack.
-- **Interaction state lives in the DOM, not the store**: hover/focus/pin expansion is element classes (`crust-expanded`) and `dataset.pinned`. Store-driven expansion (`expanded: true` via update) is treated as a *command edge* — only a change to `true` forces the panel open. On content rebuilds (`toast.update`/`toast.promise`), the live element's gesture state is carried over and is authoritative.
+- **Interaction state lives in the DOM, not the store**: hover/focus/pin expansion is element classes (`crust-expanded`) and `dataset.pinned`. Store-driven expansion (`expanded: true` via update) is treated as a _command edge_ — only a change to `true` forces the panel open. On content rebuilds (`toast.update`/`toast.promise`), the live element's gesture state is carried over and is authoritative.
 - **Timers pause/resume** on hover/focus (the reader gets time); a new `duration` or a programmatic expansion restarts the clock, but a paused toast stays paused with the fresh duration.
 - **Astro view transitions**: the renderer re-adopts its region after `astro:after-swap` so live toasts survive ClientRouter `<body>` swaps.
 - **Motion constants** `EXIT_FALLBACK_MS` / `ENTER_MS` / `STAGGER_MS` in `vanilla.ts` must stay in sync with the `--crust-dur-*` tokens in `styles.css`.
@@ -63,4 +63,4 @@ Vitest with `happy-dom`. Tests use fake timers and reset shared state in `before
 
 ## Docs site
 
-Astro 6 + React islands + Tailwind 4 (via PostCSS — the `@tailwindcss/vite` plugin is incompatible with Vite 8's rolldown build, don't switch back). All internal links must account for the `/crust` base path.
+Astro 6 + React islands + Tailwind 4. All internal links must account for the `/crust` base path.
