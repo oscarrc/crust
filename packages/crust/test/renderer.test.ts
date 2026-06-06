@@ -52,6 +52,15 @@ describe('mountToaster', () => {
     expect(toastEls()).toHaveLength(0);
   });
 
+  test('a stale handle unmount does not orphan the active toaster', () => {
+    const first = mountToaster();
+    first.unmount();
+    toaster = mountToaster({ position: 'top-left' });
+    first.unmount(); // stale — must be a no-op for the active mount
+    expect(document.querySelectorAll('.crust-region')).toHaveLength(1);
+    expect(mountToaster()).toBe(toaster); // still idempotent on the active handle
+  });
+
   test('renders toasts that existed before mounting', () => {
     toast('early bird');
     toaster = mountToaster();

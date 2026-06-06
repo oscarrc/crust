@@ -603,13 +603,16 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   const unsubscribe = toastStore.subscribe(render);
   render(toastStore.getSnapshot());
 
-  mounted = {
+  const handle: ToasterHandle = {
     unmount: () => {
       unsubscribe();
       region.remove();
       cells.clear();
-      mounted = null;
+      // A stale handle (kept across an unmount/remount cycle) must not
+      // orphan the currently-active toaster.
+      if (mounted === handle) mounted = null;
     }
   };
-  return mounted;
+  mounted = handle;
+  return handle;
 };
