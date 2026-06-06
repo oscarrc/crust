@@ -283,7 +283,11 @@ export const toast = Object.assign(
     promise: <T>(
       promise: Promise<T>,
       messages: PromiseMessages<T>,
-      options?: Omit<ToastOptions, 'type' | 'duration'> & { duration?: number }
+      options?: Omit<ToastOptions, 'type' | 'duration'> & {
+        duration?: number;
+        /** Open the outcome's message panel when the promise settles. */
+        expandOnSettle?: boolean;
+      }
     ): string => {
       const id = add(asPatch(messages.loading).message, {
         ...options,
@@ -296,7 +300,8 @@ export const toast = Object.assign(
           title: undefined,
           ...asPatch(content),
           type,
-          duration: normalizeDuration(options?.duration)
+          duration: normalizeDuration(options?.duration),
+          ...(options?.expandOnSettle ? { expanded: true } : {})
         });
       promise
         .then((value) => conclude('success', settle(messages.success, value)))

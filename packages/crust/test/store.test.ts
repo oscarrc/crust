@@ -263,6 +263,27 @@ describe('toast.promise', () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'All good', title: 'Done', type: 'success' });
   });
+
+  test('expandOnSettle expands the success outcome', async () => {
+    toast.promise(
+      Promise.resolve('ok'),
+      { loading: 'w…', success: 'done', error: 'failed' },
+      { expandOnSettle: true, title: 'Job' }
+    );
+    expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ type: 'success', expanded: true });
+  });
+
+  test('expandOnSettle expands the error outcome', async () => {
+    toast.promise(
+      Promise.reject(new Error('boom')),
+      { loading: 'w…', success: 'done', error: { message: 'failed', title: 'Bad' } },
+      { expandOnSettle: true }
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ type: 'error', expanded: true });
+  });
 });
 
 describe('expanded primitive', () => {
