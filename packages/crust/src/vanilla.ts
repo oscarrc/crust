@@ -422,6 +422,13 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     el.className = `crust-toast crust-${item.type}${expandable ? ' crust-expandable' : ''}`;
     el.dataset.id = item.id;
 
+    if (expandable && item.expanded) {
+      // Store-driven expansion behaves like click-to-pin: it stays open
+      // until the user collapses or dismisses it.
+      el.classList.add('crust-expanded');
+      el.dataset.pinned = '1';
+    }
+
     const capsule = document.createElement('div');
     capsule.className = 'crust-capsule';
 

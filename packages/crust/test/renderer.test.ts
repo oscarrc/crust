@@ -147,6 +147,38 @@ describe('in-place updates', () => {
   });
 });
 
+describe('store-driven expansion', () => {
+  beforeEach(() => {
+    toaster = mountToaster();
+  });
+
+  test('toast arriving expanded renders open and pinned', () => {
+    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+    expect(el.dataset.pinned).toBeTruthy();
+  });
+
+  test('hover-out does not collapse a store-expanded toast, click does', () => {
+    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    el.dispatchEvent(new Event('mouseenter'));
+    el.dispatchEvent(new Event('mouseleave'));
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+    el.click();
+    expect(el.classList.contains('crust-expanded')).toBe(false);
+  });
+
+  test('toast.update({ expanded: true }) opens a visible toast', () => {
+    const id = toast('details', { title: 'Later', duration: Infinity });
+    expect(document.querySelector('.crust-expanded')).toBeNull();
+    toast.update(id, { expanded: true });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+    expect(el.dataset.pinned).toBeTruthy();
+  });
+});
+
 describe('warning and loading defaults', () => {
   beforeEach(() => {
     toaster = mountToaster();
