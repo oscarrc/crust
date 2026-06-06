@@ -346,6 +346,20 @@ describe('expanded primitive', () => {
     vi.advanceTimersByTime(5000);
     expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
   });
+
+  test('expandAfter firing while hovered pins open but keeps the timer paused', () => {
+    const id = toast('m', { title: 't', duration: 4000, expandAfter: 1000 });
+    toastStore.pause(id); // hover before the expand fires
+    vi.advanceTimersByTime(1000); // expandAfter fires during hover
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ id, expanded: true });
+    vi.advanceTimersByTime(60_000); // still hovered — must not dismiss
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    toastStore.resume(id); // mouseleave → fresh full duration
+    vi.advanceTimersByTime(3999);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
 });
 
 describe('subscription & snapshots', () => {

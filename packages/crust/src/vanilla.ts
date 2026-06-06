@@ -81,12 +81,19 @@ const clearTimer = (id: string) => {
   state.timers.delete(id);
 };
 
+const clearExpandTimer = (id: string) => {
+  const timeoutId = state.expandTimers.get(id);
+  if (timeoutId != null) clearTimeout(timeoutId);
+  state.expandTimers.delete(id);
+};
+
 // `update` is defined later in the file — fine; these helpers are only
 // invoked at runtime, after module evaluation is complete.
 const scheduleExpand = (toast: Toast) => {
   // Only meaningful when there is a hidden message panel to reveal.
   if (!toast.title || toast.expandAfter === undefined) return;
   if (!Number.isFinite(toast.expandAfter)) return;
+  clearExpandTimer(toast.id); // never leak a prior timer for this id
   state.expandTimers.set(
     toast.id,
     setTimeout(() => {
@@ -94,12 +101,6 @@ const scheduleExpand = (toast: Toast) => {
       update(toast.id, { expanded: true });
     }, toast.expandAfter)
   );
-};
-
-const clearExpandTimer = (id: string) => {
-  const timeoutId = state.expandTimers.get(id);
-  if (timeoutId != null) clearTimeout(timeoutId);
-  state.expandTimers.delete(id);
 };
 
 const promote = () => {
