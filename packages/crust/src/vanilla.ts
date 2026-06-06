@@ -289,9 +289,10 @@ export const toast = Object.assign(
         expandOnSettle?: boolean;
       }
     ): string => {
+      const { expandOnSettle, ...baseOptions } = options ?? {};
       const id = add(asPatch(messages.loading).message, {
-        ...options,
-        title: asPatch(messages.loading).title ?? options?.title,
+        ...baseOptions,
+        title: asPatch(messages.loading).title ?? baseOptions.title,
         type: 'loading',
         duration: Infinity
       });
@@ -300,8 +301,8 @@ export const toast = Object.assign(
           title: undefined,
           ...asPatch(content),
           type,
-          duration: normalizeDuration(options?.duration),
-          ...(options?.expandOnSettle ? { expanded: true } : {})
+          duration: normalizeDuration(baseOptions.duration),
+          ...(expandOnSettle ? { expanded: true } : {})
         });
       promise
         .then((value) => conclude('success', settle(messages.success, value)))
