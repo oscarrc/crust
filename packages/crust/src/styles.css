@@ -257,6 +257,11 @@
 .crust-body-inner {
   min-height: 0;
   overflow: hidden;
+  /* Exclude the hidden message from the toast's intrinsic width: without
+     this, long messages pre-stretch the collapsed capsule to max width and
+     the morph loses its width axis (vertical-only instead of diagonal). */
+  width: 0;
+  min-width: 100%;
 }
 
 .crust-msg {
