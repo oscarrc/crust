@@ -32,10 +32,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:lib
       - run: pnpm test
-      - run: pnpm --filter @oscarrc/crust publish --provenance --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # auth via npm trusted publishing (OIDC) — no token; provenance is automatic
+      - run: pnpm --filter @oscarrc/crust publish --access public --no-git-checks
