@@ -117,6 +117,56 @@ describe('toast rendering', () => {
   });
 });
 
+describe('in-place updates', () => {
+  beforeEach(() => {
+    toaster = mountToaster();
+  });
+
+  test('toast.update re-renders content inside the same cell', () => {
+    const id = toast.loading('Working…', { title: 'Hold on' });
+    const cellBefore = document.querySelector('.crust-cell');
+    toast.update(id, { message: 'Done!', type: 'success' });
+    const cellAfter = document.querySelector('.crust-cell');
+    expect(cellAfter).toBe(cellBefore);
+    const el = document.querySelector('.crust-toast')!;
+    expect(el.classList.contains('crust-success')).toBe(true);
+    expect(el.classList.contains('crust-loading')).toBe(false);
+    expect(el.querySelector('.crust-msg')!.textContent).toBe('Done!');
+    expect(toastEls()).toHaveLength(1);
+  });
+
+  test('expanded state survives an update', () => {
+    const id = toast('details', { title: 'Open me', duration: Infinity });
+    const el = document.querySelector('.crust-toast')!;
+    el.dispatchEvent(new Event('mouseenter'));
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+    toast.update(id, { message: 'fresh details' });
+    const updated = document.querySelector('.crust-toast')!;
+    expect(updated.classList.contains('crust-expanded')).toBe(true);
+    expect(updated.querySelector('.crust-msg')!.textContent).toBe('fresh details');
+  });
+});
+
+describe('warning and loading defaults', () => {
+  beforeEach(() => {
+    toaster = mountToaster();
+  });
+
+  test('warning renders its type class and a default icon', () => {
+    toast.warning('careful');
+    const el = document.querySelector('.crust-toast')!;
+    expect(el.classList.contains('crust-warning')).toBe(true);
+    expect(el.querySelector('.crust-icon svg')).toBeTruthy();
+  });
+
+  test('loading renders a spinner icon', () => {
+    toast.loading('working…');
+    const el = document.querySelector('.crust-toast')!;
+    expect(el.classList.contains('crust-loading')).toBe(true);
+    expect(el.querySelector('.crust-icon .crust-spin')).toBeTruthy();
+  });
+});
+
 describe('timer gestures', () => {
   beforeEach(() => {
     toaster = mountToaster();

@@ -1,4 +1,4 @@
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'loading';
 
 /**
  * Anything the renderer can turn into a DOM node:
@@ -79,10 +79,12 @@ const promote = () => {
   }
 };
 
+const normalizeDuration = (raw: number | undefined): number =>
+  raw === undefined ? 4000 : raw === 0 ? Infinity : raw;
+
 const add = (message: string, options?: ToastOptions): string => {
   const id = `crust-${++state.seq}`;
-  const raw = options?.duration;
-  const duration = raw === undefined ? 4000 : raw === 0 ? Infinity : raw;
+  const duration = normalizeDuration(options?.duration);
   const next: Toast = {
     id,
     message,
@@ -123,6 +125,36 @@ const removeAll = () => {
   emit();
 };
 
+export type ToastPatch = Partial<Omit<Toast, 'id'>>;
+
+const update = (id: string, patch: ToastPatch) => {
+  const apply = (item: Toast): Toast => ({
+    ...item,
+    ...patch,
+    ...(patch.duration !== undefined
+      ? { duration: normalizeDuration(patch.duration) }
+      : {})
+  });
+
+  const queuedAt = state.queue.findIndex((t) => t.id === id);
+  if (queuedAt !== -1) {
+    // Still queued: patch in place; its timer starts on promotion anyway.
+    state.queue[queuedAt] = apply(state.queue[queuedAt]!);
+    return;
+  }
+
+  const current = state.toasts.find((t) => t.id === id);
+  if (!current) return;
+  const next = apply(current);
+  state.toasts = state.toasts.map((t) => (t.id === id ? next : t));
+  if (patch.duration !== undefined) {
+    // New duration restarts the clock from now.
+    clearTimer(id);
+    startTimer(next);
+  }
+  emit();
+};
+
 const pause = (id: string) => {
   const entry = state.timers.get(id);
   if (!entry || entry.timeoutId == null) return;
@@ -157,10 +189,27 @@ export const toastStore = {
   getSnapshot: (): readonly Toast[] => state.toasts,
   add,
   remove,
+  update,
   pause,
   resume,
   configure
 };
+
+type ToastContent = string | { message: string; title?: string };
+
+export interface PromiseMessages<T> {
+  loading: ToastContent;
+  success: ToastContent | ((value: T) => ToastContent);
+  error: ToastContent | ((reason: unknown) => ToastContent);
+}
+
+const asPatch = (content: ToastContent): { message: string; title?: string } =>
+  typeof content === 'string' ? { message: content } : content;
+
+const settle = <V>(
+  content: ToastContent | ((value: V) => ToastContent),
+  value: V
+): ToastContent => (typeof content === 'function' ? content(value) : content);
 
 type Shorthand = (message: string, options?: Omit<ToastOptions, 'type'>) => string;
 
@@ -175,6 +224,39 @@ export const toast = Object.assign(
     success: shorthand('success'),
     error: shorthand('error'),
     info: shorthand('info'),
+    warning: shorthand('warning'),
+    /** Loading toasts persist until updated or dismissed. */
+    loading: (message: string, options?: Omit<ToastOptions, 'type'>) =>
+      add(message, { duration: Infinity, ...options, type: 'loading' }),
+    /** Patch a live (or queued) toast. A new `duration` restarts its timer. */
+    update: (id: string, patch: ToastPatch) => update(id, patch),
+    /**
+     * Show a loading toast that morphs into success/error when the
+     * promise settles. Returns the toast id.
+     */
+    promise: <T>(
+      promise: Promise<T>,
+      messages: PromiseMessages<T>,
+      options?: Omit<ToastOptions, 'type' | 'duration'> & { duration?: number }
+    ): string => {
+      const id = add(asPatch(messages.loading).message, {
+        ...options,
+        title: asPatch(messages.loading).title ?? options?.title,
+        type: 'loading',
+        duration: Infinity
+      });
+      const conclude = (type: ToastType, content: ToastContent) =>
+        update(id, {
+          title: undefined,
+          ...asPatch(content),
+          type,
+          duration: normalizeDuration(options?.duration)
+        });
+      promise
+        .then((value) => conclude('success', settle(messages.success, value)))
+        .catch((reason) => conclude('error', settle(messages.error, reason)));
+      return id;
+    },
     /** Dismiss one toast by id, or every toast (and the queue) with no argument. */
     dismiss: (id?: string) => (id === undefined ? removeAll() : remove(id))
   }
@@ -212,7 +294,11 @@ const DEFAULT_ICONS: Record<ToastType, string> = {
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="crust-draw" d="M4.5 12.5l5 5L19.5 7" pathLength="1"/></svg>',
   error:
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="crust-draw" d="M6.5 6.5l11 11M17.5 6.5l-11 11" pathLength="1"/></svg>',
-  info: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle class="crust-draw" cx="12" cy="12" r="9" pathLength="1"/><path class="crust-draw" d="M12 11v5" pathLength="1"/><path class="crust-draw" d="M12 8v.01" pathLength="1"/></svg>'
+  info: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle class="crust-draw" cx="12" cy="12" r="9" pathLength="1"/><path class="crust-draw" d="M12 11v5" pathLength="1"/><path class="crust-draw" d="M12 8v.01" pathLength="1"/></svg>',
+  warning:
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="crust-draw" d="M12 3.5 21.5 20h-19Z" pathLength="1"/><path class="crust-draw" d="M12 10v4" pathLength="1"/><path class="crust-draw" d="M12 17v.01" pathLength="1"/></svg>',
+  loading:
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="crust-spin" d="M12 3a9 9 0 1 1-8.6 6.3"/></svg>'
 };
 
 const DISMISS_ICON =
@@ -268,15 +354,17 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   region.setAttribute('aria-label', 'Notifications');
   document.body.appendChild(region);
 
-  const cells = new Map<string, HTMLElement>();
+  interface CellEntry {
+    cell: HTMLElement;
+    inner: HTMLElement;
+    el: HTMLElement;
+    item: Toast;
+  }
 
-  const buildCell = (item: Toast): HTMLElement => {
+  const cells = new Map<string, CellEntry>();
+
+  const buildToastEl = (item: Toast): HTMLElement => {
     const expandable = Boolean(item.title);
-
-    const cell = document.createElement('div');
-    cell.className = 'crust-cell';
-    const inner = document.createElement('div');
-    inner.className = 'crust-cell-inner';
 
     const el = document.createElement('div');
     el.className = `crust-toast crust-${item.type}${expandable ? ' crust-expandable' : ''}`;
@@ -368,15 +456,40 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
       }
     });
 
-    inner.appendChild(el);
-    cell.appendChild(inner);
-    return cell;
+    return el;
   };
 
-  const beginExit = (id: string, cell: HTMLElement) => {
+  const buildCell = (item: Toast): CellEntry => {
+    const cell = document.createElement('div');
+    cell.className = 'crust-cell';
+    const inner = document.createElement('div');
+    inner.className = 'crust-cell-inner';
+    const el = buildToastEl(item);
+    inner.appendChild(el);
+    cell.appendChild(inner);
+    return { cell, inner, el, item };
+  };
+
+  const updateCell = (entry: CellEntry, item: Toast) => {
+    // Content changed (toast.update / toast.promise): rebuild the toast
+    // element inside the same cell, carrying interaction state over.
+    const fresh = buildToastEl(item);
+    if (fresh.classList.contains('crust-expandable')) {
+      if (entry.el.classList.contains('crust-expanded')) {
+        fresh.classList.add('crust-expanded');
+      }
+      if (entry.el.dataset.pinned) fresh.dataset.pinned = entry.el.dataset.pinned;
+    }
+    entry.el.replaceWith(fresh);
+    entry.el = fresh;
+    entry.item = item;
+  };
+
+  const beginExit = (id: string, entry: CellEntry) => {
+    const { cell } = entry;
     if (cell.dataset.leaving) return;
     cell.dataset.leaving = '1';
-    cell.querySelector('.crust-toast')?.classList.add('crust-leaving');
+    entry.el.classList.add('crust-leaving');
     cell.classList.remove('crust-shown');
 
     let finished = false;
@@ -396,26 +509,31 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
 
   const render = (toasts: readonly Toast[]) => {
     const visible = new Set(toasts.map((t) => t.id));
-    for (const [id, cell] of cells) {
-      if (!visible.has(id)) beginExit(id, cell);
+    for (const [id, entry] of cells) {
+      if (!visible.has(id)) beginExit(id, entry);
     }
 
     let batchIndex = 0;
     for (const item of toasts) {
-      if (cells.has(item.id)) continue;
-      const cell = buildCell(item);
-      cells.set(item.id, cell);
-      if (anchoredTop) region.prepend(cell);
-      else region.append(cell);
+      const existing = cells.get(item.id);
+      if (existing) {
+        if (existing.item !== item) updateCell(existing, item);
+        continue;
+      }
+
+      const entry = buildCell(item);
+      cells.set(item.id, entry);
+      if (anchoredTop) region.prepend(entry.cell);
+      else region.append(entry.cell);
 
       const delay = batchIndex * STAGGER_MS;
-      if (delay > 0) cell.style.setProperty('--crust-stagger', `${delay}ms`);
+      if (delay > 0) entry.cell.style.setProperty('--crust-stagger', `${delay}ms`);
       // Force a style flush so the entrance transition reliably fires.
-      void cell.offsetHeight;
-      cell.classList.add('crust-shown');
+      void entry.cell.offsetHeight;
+      entry.cell.classList.add('crust-shown');
       if (delay > 0) {
         setTimeout(
-          () => cell.style.removeProperty('--crust-stagger'),
+          () => entry.cell.style.removeProperty('--crust-stagger'),
           ENTER_MS + delay
         );
       }

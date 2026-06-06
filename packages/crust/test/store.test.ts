@@ -58,9 +58,17 @@ describe('toast()', () => {
 });
 
 describe('shorthands', () => {
-  test.each(['success', 'error', 'info'] as const)('toast.%s sets the type', (type) => {
+  test.each(['success', 'error', 'info', 'warning'] as const)('toast.%s sets the type', (type) => {
     toast[type]('msg');
     expect(toastStore.getSnapshot()[0]!.type).toBe(type);
+  });
+
+  test('toast.loading sets the type and defaults to persistent', () => {
+    toast.loading('working…');
+    const [t] = toastStore.getSnapshot();
+    expect(t).toMatchObject({ type: 'loading', duration: Infinity });
+    vi.advanceTimersByTime(1_000_000);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
   });
 
   test('survive destructuring (no this-binding)', () => {
@@ -148,6 +156,112 @@ describe('pause/resume', () => {
     toastStore.resume(id);
     vi.advanceTimersByTime(60_000);
     expect(toastStore.getSnapshot()).toHaveLength(1);
+  });
+});
+
+describe('toast.update', () => {
+  test('patches message, title and type in place', () => {
+    const id = toast('before', { duration: Infinity });
+    toast.update(id, { message: 'after', title: 'New', type: 'warning' });
+    const [t] = toastStore.getSnapshot();
+    expect(t).toMatchObject({ id, message: 'after', title: 'New', type: 'warning' });
+  });
+
+  test('produces a new object and snapshot reference', () => {
+    const id = toast('a', { duration: Infinity });
+    const before = toastStore.getSnapshot();
+    toast.update(id, { message: 'b' });
+    expect(toastStore.getSnapshot()).not.toBe(before);
+    expect(toastStore.getSnapshot()[0]).not.toBe(before[0]);
+  });
+
+  test('updating duration restarts the timer from now', () => {
+    const id = toast('slow', { duration: Infinity });
+    vi.advanceTimersByTime(10_000);
+    toast.update(id, { duration: 2000 });
+    vi.advanceTimersByTime(1999);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('duration: 0 in a patch means persistent (alias)', () => {
+    const id = toast('t', { duration: 2000 });
+    toast.update(id, { duration: 0 });
+    vi.advanceTimersByTime(1_000_000);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+  });
+
+  test('updates a queued toast too', () => {
+    const pinned = Array.from({ length: 5 }, (_, i) => toast(`p${i}`, { duration: Infinity }));
+    const queued = toast('original', { duration: Infinity });
+    toast.update(queued, { message: 'patched' });
+    toast.dismiss(pinned[0]!);
+    expect(toastStore.getSnapshot().map((t) => t.message)).toContain('patched');
+  });
+
+  test('notifies subscribers', () => {
+    const id = toast('a', { duration: Infinity });
+    const listener = vi.fn();
+    const unsubscribe = toastStore.subscribe(listener);
+    toast.update(id, { message: 'b' });
+    expect(listener).toHaveBeenCalledTimes(1);
+    unsubscribe();
+  });
+
+  test('unknown id is a safe no-op', () => {
+    toast('a', { duration: Infinity });
+    const before = toastStore.getSnapshot();
+    toast.update('nope', { message: 'x' });
+    expect(toastStore.getSnapshot()).toBe(before);
+  });
+});
+
+describe('toast.promise', () => {
+  test('shows a persistent loading toast while pending', () => {
+    let settle!: () => void;
+    toast.promise(new Promise<void>((resolve) => (settle = resolve)), {
+      loading: 'Baking…',
+      success: 'Done',
+      error: 'Burnt'
+    });
+    const [t] = toastStore.getSnapshot();
+    expect(t).toMatchObject({ message: 'Baking…', type: 'loading', duration: Infinity });
+    settle();
+  });
+
+  test('morphs into success with a function message and auto-dismisses', async () => {
+    const id = toast.promise(Promise.resolve(3), {
+      loading: 'Counting…',
+      success: (n) => `Counted ${n}`,
+      error: 'Failed'
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    const [t] = toastStore.getSnapshot();
+    expect(t).toMatchObject({ id, message: 'Counted 3', type: 'success', duration: 4000 });
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('morphs into error on rejection', async () => {
+    toast.promise(Promise.reject(new Error('boom')), {
+      loading: 'Trying…',
+      success: 'OK',
+      error: (e) => `Failed: ${(e as Error).message}`
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'Failed: boom', type: 'error' });
+  });
+
+  test('accepts object messages with titles', async () => {
+    toast.promise(Promise.resolve(), {
+      loading: { message: 'Working…', title: 'Hold on' },
+      success: { message: 'All good', title: 'Done' },
+      error: 'Failed'
+    });
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Hold on' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'All good', title: 'Done', type: 'success' });
   });
 });
 
