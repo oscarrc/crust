@@ -265,6 +265,23 @@ describe('toast.promise', () => {
   });
 });
 
+describe('expanded primitive', () => {
+  test('toast can arrive expanded', () => {
+    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    expect(toastStore.getSnapshot()[0]!.expanded).toBe(true);
+  });
+
+  test('update(id, { expanded: true }) restarts the dismiss timer', () => {
+    const id = toast('m', { title: 't', duration: 4000 });
+    vi.advanceTimersByTime(3900);
+    toast.update(id, { expanded: true });
+    vi.advanceTimersByTime(3999);
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+});
+
 describe('subscription & snapshots', () => {
   test('getSnapshot returns a stable reference between mutations', () => {
     toast('a');

@@ -13,6 +13,10 @@ export interface ToastOptions {
   /** ms before auto-dismiss. Default 4000. `Infinity` (or `0` as alias) never dismisses. */
   duration?: number;
   icon?: CrustIcon | null;
+  /** Arrive with the message panel open (pinned). */
+  expanded?: boolean;
+  /** ms after becoming visible until the toast auto-expands. Needs a `title`. */
+  expandAfter?: number;
 }
 
 export interface Toast {
@@ -22,6 +26,8 @@ export interface Toast {
   type: ToastType;
   duration: number;
   icon?: CrustIcon | null;
+  expanded?: boolean;
+  expandAfter?: number;
 }
 
 interface TimerEntry {
@@ -91,7 +97,9 @@ const add = (message: string, options?: ToastOptions): string => {
     title: options?.title,
     type: options?.type ?? 'info',
     duration,
-    icon: options?.icon
+    icon: options?.icon,
+    expanded: options?.expanded,
+    expandAfter: options?.expandAfter
   };
   if (state.toasts.length < state.maxVisible) {
     state.toasts = [...state.toasts, next];
@@ -147,8 +155,9 @@ const update = (id: string, patch: ToastPatch) => {
   if (!current) return;
   const next = apply(current);
   state.toasts = state.toasts.map((t) => (t.id === id ? next : t));
-  if (patch.duration !== undefined) {
-    // New duration restarts the clock from now.
+  // A new duration — or a programmatic expansion (new content just
+  // appeared, the reader gets the full duration again) — restarts the clock.
+  if (patch.duration !== undefined || patch.expanded === true) {
     clearTimer(id);
     startTimer(next);
   }
