@@ -1,0 +1,13 @@
+{
+  "name": "crust-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm build:lib && pnpm build:docs",
+    "build:lib": "pnpm --filter @oscarrc/crust build",
+    "build:docs": "pnpm --filter docs build",
+    "dev": "pnpm --parallel --filter @oscarrc/crust --filter docs dev",
+    "dev:docs": "pnpm --filter docs dev",
+    "test": "pnpm --filter @oscarrc/crust test",
+    "check:pkg": "pnpm --filter @oscarrc/crust check:pkg"
+  }
+}
