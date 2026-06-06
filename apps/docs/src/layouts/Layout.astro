@@ -1,13 +1,13 @@
 ---
-import { ClientRouter } from 'astro:transitions';
-import { Toaster } from '@oscarrc/crust/react';
-import '@oscarrc/crust/styles.css';
+import { ClientRouter } from "astro:transitions";
+import { Toaster } from "@oscarrc/crust/react";
+import "@oscarrc/crust/styles.css";
 
 interface Props {
   title?: string;
 }
 
-const { title = 'Crust — toasts for Astro & React' } = Astro.props;
+const { title = "Crust — toasts for Astro & React" } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -56,9 +56,9 @@ const base = import.meta.env.BASE_URL;
     --crumb: oklch(0.52 0.1 60); /* crust brown — the docs accent */
     --herb: oklch(0.55 0.12 150);
 
-    --font-display: 'Young Serif', serif;
-    --font-body: 'Hanken Grotesk', sans-serif;
-    --font-mono: 'Fragment Mono', monospace;
+    --font-display: "Young Serif", serif;
+    --font-body: "Hanken Grotesk", sans-serif;
+    --font-mono: "Fragment Mono", monospace;
 
     --space-sm: 8px;
     --space-md: 16px;
@@ -108,11 +108,15 @@ const base = import.meta.env.BASE_URL;
   }
 
   .site-header {
+    position: sticky;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     padding: var(--space-md) clamp(16px, 5vw, 64px);
     border-bottom: 1px solid var(--line);
+    background: var(--paper-raised);
+    z-index: 50;
+    top: 0;
   }
 
   .wordmark {
@@ -164,7 +168,8 @@ const base = import.meta.env.BASE_URL;
     border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 1px 2px oklch(0.2 0.01 75 / 0.05);
-    transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
+    transition:
+      transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 120ms;
   }
 
