@@ -38,7 +38,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "check:pkg": "publint && attw --pack . --profile esm-only"
+    "check:pkg": "publint && attw --pack . --profile esm-only --entrypoints ./vanilla ./react"
   },
   "peerDependencies": {
     "react": ">=18"
