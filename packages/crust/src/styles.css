@@ -141,13 +141,19 @@
   width: var(--crust-width);
 }
 
-/* Exit: faster than entrance, gently accelerating away */
+/* Exit: faster than entrance, gently accelerating away. The morph reverses
+   inside the same gesture — width and body collapse at exit speed too. */
 .crust-shown .crust-toast.crust-leaving {
   opacity: 0;
   transform: translateY(6px) scale(0.97);
   transition:
     transform var(--crust-dur-out) var(--crust-ease-exit),
-    opacity var(--crust-dur-out) var(--crust-ease-exit);
+    opacity var(--crust-dur-out) var(--crust-ease-exit),
+    width var(--crust-dur-out) var(--crust-ease-exit);
+}
+
+.crust-leaving .crust-body {
+  transition: grid-template-rows var(--crust-dur-out) var(--crust-ease-exit);
 }
 
 .crust-pos-top-right .crust-shown .crust-toast.crust-leaving,

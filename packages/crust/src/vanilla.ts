@@ -359,12 +359,7 @@ const DISMISS_ICON =
 /** Keep in sync with --crust-dur-* in styles.css; fallback removal guard. */
 const EXIT_FALLBACK_MS = 450;
 const ENTER_MS = 320;
-const MORPH_MS = 280;
 const STAGGER_MS = 50;
-
-const prefersReducedMotion = (): boolean =>
-  typeof matchMedia !== 'undefined' &&
-  matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const fromMarkup = (markup: string): Element | null => {
   const template = document.createElement('template');
@@ -596,15 +591,12 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
       });
     };
 
-    if (entry.el.classList.contains('crust-expanded')) {
-      // The exit mirrors the opening: close the morph first, then leave
-      // as a capsule — never crush an open panel through the cell clip.
-      entry.el.classList.remove('crust-expanded');
-      delete entry.el.dataset.pinned;
-      setTimeout(startExit, prefersReducedMotion() ? 0 : MORPH_MS);
-    } else {
-      startExit();
-    }
+    // The exit is the opening in reverse, as one continuous gesture: the
+    // morph closes (body + width, at exit speed via .crust-leaving CSS)
+    // while the cell collapses and the surface fades — no capsule stopover.
+    entry.el.classList.remove('crust-expanded');
+    delete entry.el.dataset.pinned;
+    startExit();
   };
 
   const render = (toasts: readonly Toast[]) => {

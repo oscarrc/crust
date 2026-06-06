@@ -213,16 +213,12 @@ describe('exit while expanded', () => {
     toaster = mountToaster();
   });
 
-  test('closes the morph first, then exits as a capsule', () => {
+  test('exits in one continuous reverse motion — morph closes and exit run together', () => {
     const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     toast.dismiss(id);
-    // Phase 1: reverse morph — expansion closes, exit has not started.
+    // One gesture: expansion reverses and the exit starts in the same frame.
     expect(el.classList.contains('crust-expanded')).toBe(false);
-    expect(el.classList.contains('crust-leaving')).toBe(false);
-    expect(document.querySelectorAll('.crust-toast')).toHaveLength(1);
-    // Phase 2: after the morph duration the normal exit plays.
-    vi.advanceTimersByTime(280);
     expect(el.classList.contains('crust-leaving')).toBe(true);
     vi.advanceTimersByTime(500);
     expect(document.querySelectorAll('.crust-toast')).toHaveLength(0);
