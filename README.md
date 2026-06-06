@@ -22,17 +22,46 @@ Most toast libraries are bloated white bread. They force you into wrapper fatigu
 - ♿ **Accessible by default.** `aria-live` region, keyboard-reachable dismiss, timers that pause while you read, and `prefers-reduced-motion` as a first-class theme.
 - 📦 **Zero-waste footprint.** ESM-only, ~2 KB of JS, one CSS file, no dependencies.
 
-## Installation
+## Quickstart
+
+Install the package:
 
 ```bash
 pnpm add @oscarrc/crust
 ```
 
-Include the standalone core styles once, at the very root of your layout:
+Import the styles and mount the toaster once, at the root of your layout — no React, no provider:
 
 ```ts
 import '@oscarrc/crust/styles.css';
+import { mountToaster } from '@oscarrc/crust/vanilla';
+
+mountToaster(); // bottom-right by default
 ```
+
+Then bake toasts from anywhere:
+
+```ts
+import { toast } from '@oscarrc/crust/vanilla';
+
+toast.success('Fresh bread out of the oven!');
+
+// A title makes a toast expandable — it morphs open on hover/focus/tap,
+// or on its own with `expandAfter`:
+toast('Your order shipped today.', {
+  title: 'Order update',
+  expandAfter: 2000 // auto-expands 2s after becoming visible
+});
+
+// Async flows: loading → success/error, opening the outcome by itself:
+toast.promise(saveDraft(), {
+  loading: 'Saving…',
+  success: (draft) => ({ title: 'Saved', message: `“${draft.name}” is safe.` }),
+  error: 'Save failed'
+}, { expandOnSettle: true });
+```
+
+That's the whole setup. For React islands, view transitions, theming, and the rest, read on — or head to the **[docs & playground](https://oscarrc.github.io/crust)**.
 
 ## Usage
 

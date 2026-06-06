@@ -22,15 +22,23 @@ const current = Astro.url.pathname.replace(/\/?$/, "/");
 ---
 
 <Layout title={`${frontmatter.title} — Crust docs`}>
-  <main class="docs">
-    <aside class="docs-nav">
-      <nav aria-label="Docs">
-        <ul>
+  <main
+    class="mx-auto grid w-full max-w-[960px] flex-1 grid-cols-1 gap-4 px-[clamp(16px,5vw,64px)] pt-8 md:grid-cols-[180px_1fr] md:gap-16"
+  >
+    <aside>
+      <nav class="sticky top-24" aria-label="Docs">
+        <ul class="m-0 grid list-none gap-1 p-0">
           {
             sidebar.map((item) => (
               <li>
                 <a
                   href={item.href}
+                  class:list={[
+                    "block rounded-lg px-2.5 py-1.5 text-sm no-underline transition-colors",
+                    current === item.href
+                      ? "bg-line/60 font-medium text-ink"
+                      : "text-ink-soft hover:text-crumb",
+                  ]}
                   aria-current={current === item.href ? "page" : undefined}
                 >
                   {item.label}
@@ -41,7 +49,7 @@ const current = Astro.url.pathname.replace(/\/?$/, "/");
         </ul>
       </nav>
     </aside>
-    <article class="prose">
+    <article class="prose prose-crust min-w-0 max-w-[70ch]">
       <h1>{frontmatter.title}</h1>
       <slot />
     </article>
@@ -49,112 +57,82 @@ const current = Astro.url.pathname.replace(/\/?$/, "/");
 </Layout>
 
 <style is:global>
-  .docs {
-    position: relative;
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: var(--space-xl);
-    padding-top: var(--space-lg);
-    max-width: 960px;
+  /* Brand-tuned typography: every prose color points at a semantic token,
+     so the dark theme flips the whole article with zero extra rules. */
+  .prose-crust {
+    --tw-prose-body: var(--ink-soft);
+    --tw-prose-headings: var(--ink);
+    --tw-prose-lead: var(--ink-soft);
+    --tw-prose-links: var(--crumb);
+    --tw-prose-bold: var(--ink);
+    --tw-prose-counters: var(--crumb);
+    --tw-prose-bullets: var(--line);
+    --tw-prose-hr: var(--line);
+    --tw-prose-quotes: var(--ink);
+    --tw-prose-quote-borders: var(--line);
+    --tw-prose-captions: var(--ink-soft);
+    --tw-prose-code: var(--ink);
+    --tw-prose-pre-code: oklch(0.92 0.008 80);
+    --tw-prose-pre-bg: oklch(0.27 0.015 60);
+    --tw-prose-th-borders: var(--line);
+    --tw-prose-td-borders: var(--line);
   }
 
-  @media (max-width: 720px) {
-    .docs {
-      grid-template-columns: 1fr;
-      gap: var(--space-md);
-    }
+  .prose-crust h1,
+  .prose-crust h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
   }
 
-  .docs-nav nav {
-    position: sticky;
-    top: var(--space-2xl);
-  }
-
-  .docs-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 4px;
-  }
-
-  .docs-nav a {
-    display: block;
-    padding: 6px 10px;
-    border-radius: 8px;
-    color: var(--ink-soft);
-    text-decoration: none;
-    font-size: 0.9rem;
-  }
-
-  .docs-nav a:hover {
-    color: var(--crumb);
-  }
-
-  .docs-nav a[aria-current="page"] {
-    background: oklch(0.93 0.015 75);
-    color: var(--ink);
-    font-weight: 500;
-  }
-
-  .prose {
-    min-width: 0;
-    max-width: 70ch;
-  }
-
-  .prose h1 {
+  .prose-crust h1 {
     font-size: 2.25rem;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 32px;
   }
 
-  .prose h2 {
+  .prose-crust h2 {
     font-size: 1.4rem;
-    margin: var(--space-xl) 0 var(--space-sm);
+    margin-top: 64px;
   }
 
-  .prose h3 {
+  .prose-crust h3 {
     font-size: 1.05rem;
-    font-family: var(--font-body);
     font-weight: 600;
-    margin: var(--space-lg) 0 var(--space-sm);
   }
 
-  .prose p,
-  .prose li {
-    color: var(--ink-soft);
-  }
-
-  .prose pre {
-    background: oklch(0.3 0.02 60);
-    color: oklch(0.92 0.008 80);
-    padding: var(--space-md) 20px;
+  .prose-crust pre {
     border-radius: 10px;
-    overflow-x: auto;
     line-height: 1.7;
   }
 
-  .prose :not(pre) > code {
+  .prose-crust :not(pre) > code {
     background: oklch(0.93 0.012 75);
     padding: 1px 5px;
     border-radius: 5px;
-    font-size: 0.85em;
+    font-weight: 400;
   }
 
-  .prose table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.9rem;
+  .dark .prose-crust :not(pre) > code {
+    background: oklch(0.3 0.014 60);
   }
 
-  .prose th,
-  .prose td {
-    text-align: left;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--line);
+  .prose-crust :not(pre) > code::before,
+  .prose-crust :not(pre) > code::after {
+    content: none; /* drop the plugin's backticks */
   }
 
-  .prose th {
-    color: var(--ink);
-    font-weight: 600;
+  .prose-crust blockquote {
+    font-style: normal;
+    font-weight: 400;
+    /* No side-stripe: a quiet raised surface carries the aside instead. */
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper-raised);
+    padding: 12px 20px;
+    margin-top: 24px;
+  }
+
+  .prose-crust blockquote p:first-of-type::before,
+  .prose-crust blockquote p:last-of-type::after {
+    content: none;
   }
 </style>

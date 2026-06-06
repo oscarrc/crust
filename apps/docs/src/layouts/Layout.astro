@@ -1,7 +1,11 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import { Font } from "astro:assets";
 import { Toaster } from "@oscarrc/crust/react";
+import GitHubIcon from "../assets/github.svg";
+import NpmIcon from "../assets/npm.svg";
 import "@oscarrc/crust/styles.css";
+import "../styles/global.css";
 
 interface Props {
   title?: string;
@@ -22,206 +26,125 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       content="Don't throw the crust. An opinionated, crisp toast library built natively for Astro and React."
     />
     <title>{title}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Fragment+Mono&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <Font cssVariable="--font-young-serif" preload />
+    <Font cssVariable="--font-hanken" preload />
+    <Font cssVariable="--font-fragment-mono" />
+    <script is:inline>
+      // Theme before first paint: localStorage wins, OS preference is the
+      // default. ClientRouter swaps <html> attributes, so re-apply after
+      // every swap. Registered once — inline head scripts run on full
+      // loads only.
+      (() => {
+        const apply = () => {
+          const stored = localStorage.getItem("theme");
+          const dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+        };
+        apply();
+        document.addEventListener("astro:after-swap", apply);
+        // The toggle lives in the header, which is replaced on every swap —
+        // delegate from document so one listener survives all navigations.
+        document.addEventListener("click", (event) => {
+          if (!event.target.closest("[data-theme-toggle]")) return;
+          const dark = !document.documentElement.classList.contains("dark");
+          document.documentElement.classList.toggle("dark", dark);
+          localStorage.setItem("theme", dark ? "dark" : "light");
+        });
+      })();
+    </script>
     <ClientRouter />
   </head>
-  <body>
-    <header class="site-header">
-      <a class="wordmark" href={base}>🍞 Crust</a>
-      <nav>
-        <a href={`${base}docs/`}>Docs</a>
-        <a href="https://github.com/oscarrc/crust">GitHub</a>
-        <a href="https://www.npmjs.com/package/@oscarrc/crust">npm</a>
+  <body class="m-0 flex min-h-screen flex-col">
+    <header
+      class="sticky top-0 z-50 flex items-baseline justify-between border-b border-line bg-paper-raised px-[clamp(16px,5vw,64px)] py-4"
+    >
+      <a
+        class="font-display text-xl whitespace-nowrap text-ink no-underline"
+        href={base}>🍞 Crust</a
+      >
+      <nav class="flex items-baseline gap-5" aria-label="Site">
+        <a
+          class="text-sm text-ink-soft no-underline transition-colors hover:text-crumb"
+          href={`${base}docs/`}>Docs</a
+        >
+        <a
+          class="text-sm text-ink-soft no-underline transition-colors hover:text-crumb"
+          href={`${base}playground/`}>Playground</a
+        >
+        <a
+          class="self-center text-ink-soft transition-colors hover:text-crumb"
+          href="https://github.com/oscarrc/crust"
+          aria-label="Crust on GitHub"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <GitHubIcon width={17} height={17} fill="currentColor" />
+        </a>
+        <a
+          class="self-center text-ink-soft transition-colors hover:text-crumb"
+          href="https://www.npmjs.com/package/@oscarrc/crust"
+          aria-label="Crust on npm"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <NpmIcon width={17} height={17} fill="currentColor" />
+        </a>
+        <button
+          type="button"
+          data-theme-toggle
+          class="relative -my-1 cursor-pointer self-center rounded-[10px] border border-line bg-paper-raised p-1.5 text-ink-soft transition-colors hover:border-crumb hover:text-crumb"
+          aria-label="Toggle color theme"
+        >
+          <!-- Sun in the light, moon in the dark — stroke-drawn, brand style. -->
+          <svg
+            class="block dark:hidden"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4.5"></circle>
+            <path
+              d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"
+            ></path>
+          </svg>
+          <svg
+            class="hidden dark:block"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
+            ></path>
+          </svg>
+        </button>
       </nav>
     </header>
     <slot />
-    <footer class="site-footer">
-      <p>MIT · baked by <a href="https://oscarrc.github.io">Oscar Rey</a></p>
+    <footer
+      class="mt-24 border-t border-line px-[clamp(16px,5vw,64px)] py-4 text-sm text-ink-soft"
+    >
+      <p class="m-0">
+        MIT · baked by <a
+          class="text-crumb underline decoration-1 underline-offset-3"
+          href="https://oscarrc.github.io">Oscar Rey</a
+        >
+      </p>
     </footer>
     <Toaster client:load transition:persist="crust-toaster" />
   </body>
 </html>
-
-<style is:global>
-  :root {
-    --paper: oklch(0.97 0.008 80);
-    --paper-raised: oklch(0.99 0.005 80);
-    --ink: oklch(0.28 0.02 60);
-    --ink-soft: oklch(0.45 0.018 60);
-    --line: oklch(0.88 0.012 75);
-    --crumb: oklch(0.52 0.1 60); /* crust brown — the docs accent */
-    --herb: oklch(0.55 0.12 150);
-
-    --font-display: "Young Serif", serif;
-    --font-body: "Hanken Grotesk", sans-serif;
-    --font-mono: "Fragment Mono", monospace;
-
-    --space-sm: 8px;
-    --space-md: 16px;
-    --space-lg: 32px;
-    --space-xl: 64px;
-    --space-2xl: 96px;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    line-height: 1.15;
-    margin: 0;
-  }
-
-  a {
-    color: var(--crumb);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-
-  code,
-  pre {
-    font-family: var(--font-mono);
-    font-size: 0.85em;
-  }
-
-  .site-header {
-    position: sticky;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: var(--space-md) clamp(16px, 5vw, 64px);
-    border-bottom: 1px solid var(--line);
-    background: var(--paper-raised);
-    z-index: 50;
-    top: 0;
-  }
-
-  .wordmark {
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .site-header nav {
-    display: flex;
-    gap: var(--space-md);
-  }
-
-  .site-header nav a {
-    color: var(--ink-soft);
-    text-decoration: none;
-    font-size: 0.9rem;
-  }
-
-  .site-header nav a:hover {
-    color: var(--crumb);
-  }
-
-  main {
-    flex: 1;
-    width: 100%;
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 0 clamp(16px, 5vw, 64px);
-  }
-
-  .site-footer {
-    border-top: 1px solid var(--line);
-    margin-top: var(--space-2xl);
-    padding: var(--space-md) clamp(16px, 5vw, 64px);
-    color: var(--ink-soft);
-    font-size: 0.85rem;
-  }
-
-  /* Shared bits used by both pages */
-  .btn {
-    appearance: none;
-    border: 1px solid var(--line);
-    background: var(--paper-raised);
-    color: var(--ink);
-    font: 500 0.9rem var(--font-body);
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 1px 2px oklch(0.2 0.01 75 / 0.05);
-    transition:
-      transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 120ms;
-  }
-
-  .btn:hover {
-    border-color: var(--crumb);
-    transform: translateY(-1px);
-  }
-
-  .btn:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  .btn-primary {
-    background: var(--crumb);
-    border-color: var(--crumb);
-    color: var(--paper-raised);
-  }
-
-  .island {
-    border: 1px dashed var(--crumb);
-    border-radius: 10px;
-    padding: var(--space-md) 20px;
-    max-width: 480px;
-  }
-
-  .island-label {
-    margin: 0 0 var(--space-sm);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--crumb);
-  }
-
-  .island-buttons {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-  }
-
-  pre.code-block {
-    background: oklch(0.3 0.02 60);
-    color: oklch(0.92 0.008 80);
-    padding: var(--space-md) 20px;
-    border-radius: 10px;
-    overflow-x: auto;
-    line-height: 1.7;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .btn {
-      transition: none;
-    }
-  }
-</style>

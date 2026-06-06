@@ -1,0 +1,377 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const inputClass =
+  "w-full rounded-[10px] border border-line bg-paper-raised px-3 py-2 text-sm text-ink shadow-crumb-sm placeholder:text-ink-soft";
+const labelClass = "mb-1.5 block text-sm font-medium text-ink";
+const hintClass = "mt-1.5 text-xs text-ink-soft";
+---
+
+<Layout title="Playground — Crust">
+  <main class="mx-auto w-full max-w-[960px] flex-1 px-[clamp(16px,5vw,64px)]">
+    <section class="pt-16 pb-12">
+      <h1 class="m-0 font-display text-[clamp(2rem,5vw,3rem)] font-normal">
+        The baking room
+      </h1>
+      <p class="mt-4 mb-0 max-w-[56ch] text-ink-soft">
+        Every option Crust knows, in one form. Dial it in, bake, repeat — the
+        code below always matches what you're about to fire.
+      </p>
+    </section>
+
+    <form
+      id="playground-form"
+      class="grid items-start gap-x-16 gap-y-6 pb-16 md:grid-cols-2"
+    >
+      <!-- Left: what the toast says and shows -->
+      <div class="grid content-start gap-6">
+        <div>
+          <label class={labelClass} for="pg-title">Title</label>
+          <input
+            class={inputClass}
+            id="pg-title"
+            name="title"
+            type="text"
+            value="Fresh bake"
+          />
+          <p class={hintClass}>
+            A title unlocks the morph-expand. Clear it for a plain capsule.
+          </p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="pg-message">Message</label>
+          <textarea class={inputClass} id="pg-message" name="message" rows="4"
+            >Golden brown and ready to serve.</textarea
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class={labelClass} for="pg-type">Type</label>
+            <select class={inputClass} id="pg-type" name="type">
+              <option value="success" selected>success</option>
+              <option value="error">error</option>
+              <option value="info">info</option>
+              <option value="warning">warning</option>
+              <option value="loading">loading</option>
+            </select>
+          </div>
+          <div>
+            <label class={labelClass} for="pg-icon">Icon</label>
+            <select class={inputClass} id="pg-icon" name="icon">
+              <option value="default" selected>Built-in</option>
+              <option value="croissant">Croissant</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+        <p class="-mt-3 text-xs text-ink-soft">
+          Type picks the stroke icon and its color — surfaces stay neutral.
+        </p>
+      </div>
+
+      <!-- Right: how it behaves, and the trigger -->
+      <div class="grid content-start gap-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class={labelClass} for="pg-duration">Duration (ms)</label>
+            <input
+              class={inputClass}
+              id="pg-duration"
+              name="duration"
+              type="number"
+              min="0"
+              step="500"
+              value="4000"
+            />
+            <p class={hintClass}>0 never auto-dismisses.</p>
+          </div>
+          <div>
+            <label class={labelClass} for="pg-expand-after"
+              >Auto-expand (ms)</label
+            >
+            <input
+              class={inputClass}
+              id="pg-expand-after"
+              name="expandAfter"
+              type="number"
+              min="0"
+              step="250"
+              placeholder="off"
+            />
+            <p class={hintClass}>Needs a title.</p>
+          </div>
+        </div>
+
+        <label
+          class="flex w-fit cursor-pointer items-center gap-2.5 text-sm font-medium text-ink"
+        >
+          <input class="size-4 accent-crumb" type="checkbox" name="expanded" />
+          Arrive expanded (pinned open)
+        </label>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class={labelClass} for="pg-position">Position</label>
+            <select class={inputClass} id="pg-position" name="position">
+              <option value="top-left">top-left</option>
+              <option value="top-center">top-center</option>
+              <option value="top-right">top-right</option>
+              <option value="bottom-left">bottom-left</option>
+              <option value="bottom-center">bottom-center</option>
+              <option value="bottom-right" selected>bottom-right</option>
+            </select>
+          </div>
+          <div>
+            <label class={labelClass} for="pg-max">Max visible</label>
+            <input
+              class={inputClass}
+              id="pg-max"
+              name="maxVisible"
+              type="number"
+              min="1"
+              max="20"
+              value="5"
+            />
+          </div>
+        </div>
+        <p class="-mt-3 text-xs text-ink-soft">
+          Toaster options apply immediately — the region remounts in place and
+          live toasts ride along.
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-primary mt-2 py-3 text-base"
+          data-bake-config
+        >
+          Bake this toast
+        </button>
+      </div>
+
+      <!-- Full-width: the equivalent code -->
+      <div class="relative mt-4 md:col-span-2">
+        <pre
+          class="code-block m-0 whitespace-pre-wrap"><code id="pg-snippet" /></pre>
+        <button
+          type="button"
+          class="absolute top-2.5 right-2.5 cursor-pointer rounded-lg p-2 text-oven-ink/70 transition-colors hover:text-oven-ink"
+          data-copy-snippet
+          aria-label="Copy code"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+        </button>
+        <p class="mt-3 mb-0 text-xs text-ink-soft">
+          Spam the bake button — batches stagger in, and anything beyond “max
+          visible” waits its turn.
+        </p>
+      </div>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  import { toast, mountToaster } from "@oscarrc/crust/vanilla";
+  import type { ToasterPosition, ToastType } from "@oscarrc/crust/vanilla";
+  import { createElement, Croissant } from "lucide";
+
+  interface Settings {
+    type: ToastType;
+    title: string;
+    message: string;
+    duration: number;
+    expandAfter: number | undefined;
+    icon: "default" | "croissant" | "none";
+    expanded: boolean;
+    position: ToasterPosition;
+    maxVisible: number;
+  }
+
+  const DEFAULTS: Settings = {
+    type: "success",
+    title: "Fresh bake",
+    message: "Golden brown and ready to serve.",
+    duration: 4000,
+    expandAfter: undefined,
+    icon: "default",
+    expanded: false,
+    position: "bottom-right",
+    maxVisible: 5,
+  };
+
+  // Module state survives view-transition swaps; the form DOM does not.
+  // astro:page-load re-syncs fresh DOM from here.
+  const settings: Settings = { ...DEFAULTS };
+
+  const form = () =>
+    document.getElementById("playground-form") as HTMLFormElement | null;
+
+  const readForm = () => {
+    const el = form();
+    if (!el) return;
+    const data = new FormData(el);
+    settings.type = (data.get("type") as ToastType) ?? DEFAULTS.type;
+    settings.title = (data.get("title") as string) ?? "";
+    settings.message = (data.get("message") as string) || DEFAULTS.message;
+    settings.duration = Number(data.get("duration") ?? DEFAULTS.duration);
+    const after = data.get("expandAfter") as string;
+    settings.expandAfter =
+      after === "" || after == null ? undefined : Number(after);
+    settings.icon = (data.get("icon") as Settings["icon"]) ?? "default";
+    settings.expanded = data.get("expanded") === "on";
+    settings.position =
+      (data.get("position") as ToasterPosition) ?? DEFAULTS.position;
+    settings.maxVisible = Math.max(1, Number(data.get("maxVisible") ?? 5));
+  };
+
+  const writeForm = () => {
+    const el = form();
+    if (!el) return;
+    (el.elements.namedItem("type") as HTMLSelectElement).value = settings.type;
+    (el.elements.namedItem("title") as HTMLInputElement).value = settings.title;
+    (el.elements.namedItem("message") as HTMLTextAreaElement).value =
+      settings.message;
+    (el.elements.namedItem("duration") as HTMLInputElement).value = String(
+      settings.duration,
+    );
+    (el.elements.namedItem("expandAfter") as HTMLInputElement).value =
+      settings.expandAfter === undefined ? "" : String(settings.expandAfter);
+    (el.elements.namedItem("icon") as HTMLSelectElement).value = settings.icon;
+    (el.elements.namedItem("expanded") as HTMLInputElement).checked =
+      settings.expanded;
+    (el.elements.namedItem("position") as HTMLSelectElement).value =
+      settings.position;
+    (el.elements.namedItem("maxVisible") as HTMLInputElement).value = String(
+      settings.maxVisible,
+    );
+  };
+
+  const snippet = (): string => {
+    const lines: string[] = ["import { toast } from '@oscarrc/crust/vanilla';"];
+    if (settings.icon === "croissant")
+      lines.push("import { createElement, Croissant } from 'lucide';");
+
+    if (
+      settings.position !== DEFAULTS.position ||
+      settings.maxVisible !== DEFAULTS.maxVisible
+    ) {
+      const opts: string[] = [];
+      if (settings.position !== DEFAULTS.position)
+        opts.push(`position: '${settings.position}'`);
+      if (settings.maxVisible !== DEFAULTS.maxVisible)
+        opts.push(`maxVisible: ${settings.maxVisible}`);
+      lines[0] =
+        "import { toast, mountToaster } from '@oscarrc/crust/vanilla';";
+      lines.push("", `mountToaster({ ${opts.join(", ")} });`);
+    }
+
+    const opts: string[] = [];
+    if (settings.title) opts.push(`title: ${JSON.stringify(settings.title)}`);
+    if (settings.duration !== DEFAULTS.duration)
+      opts.push(`duration: ${settings.duration}`);
+    if (settings.expandAfter !== undefined)
+      opts.push(`expandAfter: ${settings.expandAfter}`);
+    if (settings.expanded) opts.push("expanded: true");
+    if (settings.icon === "croissant")
+      opts.push("icon: () => createElement(Croissant)");
+    if (settings.icon === "none") opts.push("icon: null");
+
+    // Always the shorthand — it reads like the docs and carries the type.
+    const call = `toast.${settings.type}`;
+    const message = JSON.stringify(settings.message);
+    const body =
+      opts.length === 0
+        ? `${call}(${message});`
+        : `${call}(${message}, {\n  ${opts.join(",\n  ")}\n});`;
+
+    lines.push("", body);
+    return lines.join("\n");
+  };
+
+  const renderSnippet = () => {
+    const code = document.getElementById("pg-snippet");
+    if (code) code.textContent = snippet();
+  };
+
+  let mountedWith = `${DEFAULTS.position}/${DEFAULTS.maxVisible}`;
+  const remountIfNeeded = () => {
+    const wanted = `${settings.position}/${settings.maxVisible}`;
+    if (wanted === mountedWith) return;
+    mountedWith = wanted;
+    // Public API only: grab the active handle, swap the toaster in place.
+    // The store is untouched — live toasts re-render into the new region.
+    mountToaster().unmount();
+    mountToaster({
+      position: settings.position,
+      maxVisible: settings.maxVisible,
+    });
+  };
+
+  const bake = () => {
+    toast(settings.message, {
+      type: settings.type,
+      title: settings.title || undefined,
+      duration: settings.duration,
+      expandAfter: settings.expandAfter,
+      expanded: settings.expanded || undefined,
+      ...(settings.icon === "croissant"
+        ? { icon: () => createElement(Croissant) }
+        : settings.icon === "none"
+          ? { icon: null }
+          : {}),
+    });
+  };
+
+  // Document-level delegation: one set of listeners survives every
+  // view-transition swap. astro:page-load re-syncs the fresh form DOM.
+  document.addEventListener("astro:page-load", () => {
+    writeForm();
+    renderSnippet();
+  });
+
+  document.addEventListener("input", (event) => {
+    if (!(event.target as HTMLElement).closest("#playground-form")) return;
+    readForm();
+    remountIfNeeded();
+    renderSnippet();
+  });
+
+  document.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+
+    if (target.closest("[data-bake-config]")) {
+      event.preventDefault(); // inside a <form> — don't submit/navigate
+      bake();
+    }
+
+    if (target.closest("[data-copy-snippet]")) {
+      navigator.clipboard
+        .writeText(snippet())
+        .then(() =>
+          toast.success("The recipe is on your clipboard.", {
+            title: "Copied",
+          }),
+        )
+        .catch(() =>
+          toast.error("Clipboard said no — copy it by hand.", {
+            title: "No luck",
+          }),
+        );
+    }
+  });
+</script>

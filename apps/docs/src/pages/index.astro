@@ -7,33 +7,73 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <Layout>
-  <main>
-    <section class="hero">
-      <h1>Don't throw<br />the crust.</h1>
-      <p class="lede">
+  <main class="mx-auto w-full max-w-[960px] flex-1 px-[clamp(16px,5vw,64px)]">
+    <section class="pt-24 pb-16">
+      <h1
+        class="m-0 font-display text-[clamp(2.75rem,8vw,4.5rem)] leading-[1.15] font-normal tracking-[-0.01em]"
+      >
+        Don't throw<br />the crust.
+      </h1>
+      <p class="my-8 max-w-[56ch] text-lg text-ink-soft">
         An opinionated, crisp toast library built natively for Astro and React.
         One store, one renderer, warm matte surfaces — and a capsule that grows
         into a card as a single continuous surface.
       </p>
-      <div class="hero-actions">
-        <button class="btn btn-primary" data-bake="success">Bake a toast</button>
+      <div class="flex flex-wrap items-center gap-4">
+        <button class="btn btn-primary" data-bake="success">Bake a toast</button
+        >
         <a class="btn" href={`${base}docs/`}>Read the docs</a>
+      </div>
+
+      <div
+        class="mt-10 flex max-w-md items-center justify-between gap-4 rounded-[10px] bg-oven py-3.5 pr-2.5 pl-5"
+      >
+        <code class="font-mono text-sm text-oven-ink"
+          ><span class="select-none text-oven-ink/50">$ </span>pnpm add
+          @oscarrc/crust</code
+        >
+        <button
+          type="button"
+          class="cursor-pointer rounded-lg p-2 text-oven-ink/70 transition-colors hover:text-oven-ink"
+          data-copy="pnpm add @oscarrc/crust"
+          aria-label="Copy install command"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+        </button>
       </div>
     </section>
 
-    <section class="bakery">
-      <h2>The bakery</h2>
-      <p class="section-note">
-        These buttons are plain Astro <code>&lt;script&gt;</code> — zero React in
-        this execution path.
+    <section class="mt-24">
+      <h2 class="m-0 mb-2 font-display text-[1.75rem] font-normal">
+        The bakery
+      </h2>
+      <p class="m-0 max-w-[60ch] text-sm text-ink-soft">
+        Every kind of toast, fired from a plain Astro
+        <code class="font-mono text-[0.85em]">&lt;script&gt;</code> — zero React
+        in this execution path.
       </p>
-      <div class="tray" id="vanilla-tray">
+      <div class="mt-4 mb-8 flex flex-wrap gap-2">
         <button class="btn" data-bake="success">Success</button>
         <button class="btn" data-bake="error">Error</button>
         <button class="btn" data-bake="info">Info</button>
         <button class="btn" data-bake="warning">Warning</button>
+        <button class="btn" data-bake="loading">Loading (3s proof)</button>
         <button class="btn" data-bake="promise">Promise (2s bake)</button>
-        <button class="btn" data-bake="expand-after">Expand after 2s</button>
+        <button class="btn" data-bake="expand">Expandable (hover it)</button>
         <button class="btn" data-bake="persistent">Persistent</button>
         <button class="btn" data-bake="custom-icon">Custom lucide icon</button>
         <button class="btn" data-bake="spam">Spam ×10</button>
@@ -42,73 +82,90 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
       <Playground client:visible />
 
-      <p class="section-note">
-        Now navigate to the <a href={`${base}docs/`}>docs page</a> with a toast still
-        up — it survives the page transition. Crust re-adopts its toaster
-        across Astro's view-transition swaps, timers and all.
+      <p class="mt-6 max-w-[60ch] text-sm text-ink-soft">
+        Now navigate to the <a
+          class="text-crumb underline decoration-1 underline-offset-3"
+          href={`${base}docs/`}>docs page</a
+        > with a toast still up — it survives the page transition. Crust re-adopts
+        its toaster across Astro's view-transition swaps, timers and all.
       </p>
     </section>
 
-    <section class="positions">
-      <h2>Positions</h2>
-      <p class="section-note">
-        Six anchors, one option. Pick where the toaster lives — this remounts
-        it live via <code>mountToaster(&#123; position &#125;)</code>.
-      </p>
-      <div class="viewport-map" id="position-map" role="group" aria-label="Toaster position">
-        <button class="pos-dot" data-pos="top-left" aria-label="Top left" aria-pressed="false"></button>
-        <button class="pos-dot" data-pos="top-center" aria-label="Top center" aria-pressed="false"></button>
-        <button class="pos-dot" data-pos="top-right" aria-label="Top right" aria-pressed="false"></button>
-        <button class="pos-dot" data-pos="bottom-left" aria-label="Bottom left" aria-pressed="false"></button>
-        <button class="pos-dot" data-pos="bottom-center" aria-label="Bottom center" aria-pressed="false"></button>
-        <button class="pos-dot" data-pos="bottom-right" aria-label="Bottom right" aria-pressed="true"></button>
-      </div>
-    </section>
-
-    <section class="why">
-      <h2>Why Crust</h2>
-      <ol class="why-list">
+    <section class="mt-24">
+      <h2 class="m-0 mb-2 font-display text-[1.75rem] font-normal">
+        Why Crust
+      </h2>
+      <ol class="why-list m-0 mt-8 grid list-none gap-8 p-0">
         <li>
-          <h3>Astro-first, honestly</h3>
-          <p>
+          <h3 class="m-0 mb-1 font-display text-[1.15rem] font-normal">
+            Astro-first, honestly
+          </h3>
+          <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             The renderer is vanilla DOM. A React-free Astro site renders toasts
-            with <code>mountToaster()</code> — React is an optional peer, not a requirement.
+            with <code class="font-mono text-[0.85em]">mountToaster()</code> —
+            React is an optional peer, not a requirement.
           </p>
         </li>
         <li>
-          <h3>One surface, growing</h3>
-          <p>
+          <h3 class="m-0 mb-1 font-display text-[1.15rem] font-normal">
+            One surface, growing
+          </h3>
+          <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             Hover a toast with a title and the capsule morphs into a card —
             constant radius, one container, no second panel bolted on.
           </p>
         </li>
         <li>
-          <h3>Nothing waits</h3>
-          <p>
+          <h3 class="m-0 mb-1 font-display text-[1.15rem] font-normal">
+            Nothing waits
+          </h3>
+          <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             Entrances land in 320ms, exits in 200, and interaction is never
-            blocked. Timers pause while you read. Reduced motion is a theme, not
-            an afterthought.
+            blocked. Timers pause while you read. Reduced motion is a theme,
+            not an afterthought.
           </p>
         </li>
         <li>
-          <h3>Your site's voice wins</h3>
-          <p>
+          <h3 class="m-0 mb-1 font-display text-[1.15rem] font-normal">
+            Your site's voice wins
+          </h3>
+          <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             Fonts inherit from the host page and every color, radius and
-            duration is a <code>--crust-*</code> custom property away.
+            duration is a <code class="font-mono text-[0.85em]">--crust-*</code>
+            custom property away.
           </p>
         </li>
       </ol>
     </section>
-
-    <section class="install">
-      <h2>Install</h2>
-      <pre class="code-block"><code>pnpm add @oscarrc/crust</code></pre>
-    </section>
   </main>
 </Layout>
 
+<style>
+  /* Editorial numbering — CSS counters read better as a scoped rule than
+     as a string of arbitrary-value utilities. */
+  .why-list {
+    counter-reset: why;
+  }
+
+  .why-list li {
+    counter-increment: why;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    column-gap: 16px;
+    max-width: 64ch;
+  }
+
+  .why-list li::before {
+    content: counter(why, decimal-leading-zero);
+    font-family: var(--font-mono);
+    color: var(--color-crumb);
+    font-size: 0.9rem;
+    padding-top: 0.45rem;
+  }
+</style>
+
 <script>
-  import { toast, mountToaster, type ToasterPosition } from "@oscarrc/crust/vanilla";
+  import { toast } from "@oscarrc/crust/vanilla";
   import { createElement, Croissant } from "lucide";
 
   const bakes: Record<string, () => void> = {
@@ -119,6 +176,20 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     info: () => toast.info("Proofing takes as long as it takes."),
     warning: () =>
       toast.warning("The oven is running hot.", { title: "Mind the heat" }),
+    loading: () => {
+      // Loading toasts persist until updated — prove toast.update too.
+      const id = toast.loading("Proofing the dough…", { title: "Patience" });
+      setTimeout(
+        () =>
+          toast.update(id, {
+            type: "success",
+            title: "Proofed",
+            message: "Risen and ready.",
+            duration: 4000,
+          }),
+        3000,
+      );
+    },
     promise: () =>
       toast.promise(
         new Promise<string>((resolve, reject) =>
@@ -141,12 +212,15 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
             title: "Bake failed",
           }),
         },
-        { expandOnSettle: true },
       ),
-    "expand-after": () =>
+    expand: () =>
       toast(
-        "Two seconds after landing, this toast opens itself — and the dismiss timer starts over.",
-        { title: "Patience", type: "info", expandAfter: 2000 },
+        "Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.",
+        {
+          title: "Morph-expand",
+          type: "info",
+          duration: 10_000,
+        },
       ),
     persistent: () =>
       toast("This one stays until you dismiss it.", {
@@ -170,144 +244,25 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   // load, and ClientRouter swaps the <body> on navigation — listeners bound
   // to specific elements would die on the first round trip.
   document.addEventListener("click", (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLElement>(
-      "[data-bake]",
-    );
-    if (button) bakes[button.dataset.bake!]?.();
-  });
+    const target = event.target as HTMLElement;
 
-  document.getElementById("position-map")?.addEventListener("click", (event) => {
-    const dot = (event.target as HTMLElement).closest<HTMLElement>("[data-pos]");
-    if (!dot) return;
-    const position = dot.dataset.pos as ToasterPosition;
-    mountToaster().unmount(); // idempotent call returns the live handle
-    mountToaster({ position });
-    document
-      .querySelectorAll("#position-map [data-pos]")
-      .forEach((d) => d.setAttribute("aria-pressed", String(d === dot)));
-    toast.success(`Now baking at ${position.replace("-", " ")}.`, {
-      title: "Position",
-    });
+    const bake = target.closest<HTMLElement>("[data-bake]");
+    if (bake) bakes[bake.dataset.bake!]?.();
+
+    const copy = target.closest<HTMLElement>("[data-copy]");
+    if (copy) {
+      navigator.clipboard
+        .writeText(copy.dataset.copy!)
+        .then(() =>
+          toast.success("The recipe is on your clipboard.", {
+            title: "Copied",
+          }),
+        )
+        .catch(() =>
+          toast.error("Clipboard said no — copy it by hand.", {
+            title: "No luck",
+          }),
+        );
+    }
   });
 </script>
-
-<style>
-  .hero {
-    padding: var(--space-2xl) 0 var(--space-xl);
-  }
-
-  .hero h1 {
-    font-size: clamp(2.75rem, 8vw, 4.5rem);
-    letter-spacing: -0.01em;
-  }
-
-  .lede {
-    max-width: 56ch;
-    font-size: 1.125rem;
-    color: var(--ink-soft);
-    margin: var(--space-lg) 0;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: var(--space-md);
-    flex-wrap: wrap;
-  }
-
-  section + section {
-    margin-top: var(--space-2xl);
-  }
-
-  h2 {
-    font-size: 1.75rem;
-    margin-bottom: var(--space-sm);
-  }
-
-  .section-note {
-    color: var(--ink-soft);
-    font-size: 0.9rem;
-    max-width: 60ch;
-  }
-
-  .tray {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-    margin: var(--space-md) 0 var(--space-lg);
-  }
-
-  .why-list {
-    list-style: none;
-    counter-reset: why;
-    margin: var(--space-lg) 0 0;
-    padding: 0;
-    display: grid;
-    gap: var(--space-lg);
-  }
-
-  .why-list li {
-    counter-increment: why;
-    display: grid;
-    grid-template-columns: 3rem 1fr;
-    column-gap: var(--space-md);
-    max-width: 64ch;
-  }
-
-  .why-list li::before {
-    content: counter(why, decimal-leading-zero);
-    font-family: var(--font-mono);
-    color: var(--crumb);
-    font-size: 0.9rem;
-    padding-top: 0.45rem;
-  }
-
-  .why-list h3 {
-    font-size: 1.15rem;
-    margin-bottom: 4px;
-  }
-
-  .why-list p {
-    grid-column: 2;
-    margin: 0;
-    color: var(--ink-soft);
-    font-size: 0.95rem;
-  }
-
-  .viewport-map {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    max-width: 380px;
-    margin-top: var(--space-md);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--paper-raised);
-  }
-
-  .pos-dot {
-    position: absolute;
-    width: 26px;
-    height: 14px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: var(--paper);
-    cursor: pointer;
-    transition: border-color 120ms, background-color 120ms, transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .pos-dot:hover {
-    border-color: var(--crumb);
-    transform: scale(1.15);
-  }
-
-  .pos-dot[aria-pressed="true"] {
-    background: var(--crumb);
-    border-color: var(--crumb);
-  }
-
-  .pos-dot[data-pos="top-left"] { top: 10px; left: 10px; }
-  .pos-dot[data-pos="top-center"] { top: 10px; left: 50%; translate: -50% 0; }
-  .pos-dot[data-pos="top-right"] { top: 10px; right: 10px; }
-  .pos-dot[data-pos="bottom-left"] { bottom: 10px; left: 10px; }
-  .pos-dot[data-pos="bottom-center"] { bottom: 10px; left: 50%; translate: -50% 0; }
-  .pos-dot[data-pos="bottom-right"] { bottom: 10px; right: 10px; }
-</style>

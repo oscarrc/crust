@@ -1,0 +1,168 @@
+/* ==========================================================================
+   Crust docs — Tailwind v4 theme.
+   Warm matte paper in the light; dark bread-crust at night.
+   Light values carried over from the original brand sheet; the dark theme
+   keeps the same hue family (crumb-brown 60, paper 80) — never gray-blue.
+   ========================================================================== */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: oklch(0.97 0.008 80);
+  --paper-raised: oklch(0.99 0.005 80);
+  --ink: oklch(0.28 0.02 60);
+  --ink-soft: oklch(0.45 0.018 60);
+  --line: oklch(0.88 0.012 75);
+  --crumb: oklch(0.52 0.1 60); /* crust brown — the docs accent */
+  --herb: oklch(0.55 0.12 150);
+  --shadow-color: oklch(0.2 0.01 75);
+  color-scheme: light;
+}
+
+.dark {
+  /* Dark is not inverted light: depth comes from surface lightness, the
+     accent gains lightness and sheds a little chroma to sit on dark paper. */
+  --paper: oklch(0.21 0.012 60);
+  --paper-raised: oklch(0.25 0.013 60);
+  --ink: oklch(0.93 0.01 80);
+  --ink-soft: oklch(0.71 0.014 70);
+  --line: oklch(0.32 0.012 60);
+  --crumb: oklch(0.74 0.09 65); /* toasted gold — readable on dark crust */
+  --herb: oklch(0.72 0.11 150);
+  --shadow-color: oklch(0 0 0);
+  color-scheme: dark;
+}
+
+@theme {
+  --color-*: initial;
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-crumb: var(--crumb);
+  --color-herb: var(--herb);
+  /* Code blocks share one "oven" surface in both themes. */
+  --color-oven: oklch(0.27 0.015 60);
+  --color-oven-ink: oklch(0.92 0.008 80);
+
+  --font-display: var(--font-young-serif);
+  --font-body: var(--font-hanken);
+  --font-mono: var(--font-fragment-mono);
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --shadow-crumb-sm: 0 1px 2px oklch(from var(--shadow-color) l c h / 0.05);
+  --shadow-crumb-md:
+    0 1px 2px oklch(from var(--shadow-color) l c h / 0.06),
+    0 6px 16px -4px oklch(from var(--shadow-color) l c h / 0.12);
+}
+
+/* Toasts follow the site toggle, not the OS. Declared after the library
+   sheet so these win the cascade; .dark .crust-region outranks the
+   library's prefers-color-scheme block. This is the documented theming
+   path — see /docs/theming/. */
+/* .crust-region {
+  --crust-surface: oklch(0.98 0.005 75);
+  --crust-ink: oklch(0.28 0.012 75);
+  --crust-ink-muted: oklch(0.5 0.012 75);
+  --crust-border: oklch(0.89 0.01 75);
+  --crust-shadow:
+    0 1px 2px oklch(0.2 0.01 75 / 0.05),
+    0 6px 16px -4px oklch(0.2 0.01 75 / 0.1);
+  --crust-success: oklch(0.55 0.12 150);
+  --crust-error: oklch(0.55 0.15 30);
+  --crust-info: oklch(0.55 0.1 250);
+  --crust-warning: oklch(0.62 0.13 80);
+}
+
+.dark .crust-region {
+  --crust-surface: oklch(0.26 0.01 60);
+  --crust-ink: oklch(0.93 0.008 80);
+  --crust-ink-muted: oklch(0.7 0.012 70);
+  --crust-border: oklch(0.35 0.012 60);
+  --crust-shadow:
+    0 1px 2px oklch(0 0 0 / 0.3),
+    0 6px 16px -4px oklch(0 0 0 / 0.45);
+  --crust-success: oklch(0.72 0.13 150);
+  --crust-error: oklch(0.7 0.16 30);
+  --crust-info: oklch(0.72 0.11 250);
+  --crust-warning: oklch(0.75 0.13 80);
+}
+ */
+@layer components {
+  .btn {
+    appearance: none;
+    cursor: pointer;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper-raised);
+    color: var(--color-ink);
+    font: 500 0.9rem var(--font-body);
+    padding: 10px 18px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-crumb-sm);
+    text-decoration: none;
+    transition:
+      transform 120ms var(--ease-out-quint),
+      border-color 120ms,
+      color 120ms;
+  }
+
+  .btn:hover {
+    border-color: var(--color-crumb);
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn-primary {
+    background: var(--color-crumb);
+    border-color: var(--color-crumb);
+    color: var(--color-paper-raised);
+  }
+
+  .btn-primary:hover {
+    border-color: var(--color-crumb);
+  }
+
+  .code-block {
+    background: var(--color-oven);
+    color: var(--color-oven-ink);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    padding: 16px 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background: oklch(from var(--crumb) l c h / 0.25);
+  }
+
+  /* Keyboard focus only; crumb ring offset from the element. */
+  :focus-visible {
+    outline: 2px solid var(--color-crumb);
+    outline-offset: 2px;
+  }
+}

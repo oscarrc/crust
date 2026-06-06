@@ -3,11 +3,12 @@ layout: ../../layouts/DocsLayout.astro
 title: Theming & icons
 ---
 
-## Custom properties
+Crust ships a warm matte theme with automatic dark mode, and assumes you'll
+want to make it yours. Every token is a CSS custom property on
+`.crust-region` — override what you need, keep the rest. Typography always
+inherits from your page; Crust never loads a font.
 
-Crust ships a warm matte theme with automatic dark mode. Every token is a
-CSS custom property on `.crust-region` — override what you need, keep the
-rest:
+## Custom properties
 
 ```css
 .crust-region {
@@ -31,7 +32,38 @@ rest:
 | Shape       | `--crust-radius`, `--crust-width`, `--crust-offset`, `--crust-z` |
 | Motion      | `--crust-ease`, `--crust-ease-exit`, `--crust-dur-in`, `--crust-dur-morph`, `--crust-dur-out` |
 
-Typography inherits from your page — Crust never loads a font.
+Semantic color is deliberately confined to the icon strokes — surfaces stay
+neutral, text stays ink. If you override the semantic tokens, they'll still
+only color the icons.
+
+## Dark mode
+
+Out of the box, Crust follows the operating system through
+`prefers-color-scheme` — no setup, no flash.
+
+If your site has its own theme toggle (a `.dark` class on `<html>` is the
+common pattern), take over both halves explicitly. Your stylesheet loads
+after Crust's, so flat declarations win the cascade over its media query:
+
+```css
+/* Pin the light theme regardless of OS… */
+.crust-region {
+  --crust-surface: oklch(0.98 0.005 75);
+  --crust-ink: oklch(0.28 0.012 75);
+}
+
+/* …and switch on your class instead. */
+.dark .crust-region {
+  --crust-surface: oklch(0.26 0.01 60);
+  --crust-ink: oklch(0.93 0.008 80);
+  --crust-border: oklch(0.35 0.012 60);
+}
+```
+
+Two notes from experience: dark mode is not inverted light mode — keep your
+hue family and let depth come from surface lightness, not shadows. And
+semantic colors want a little more lightness on dark surfaces (the built-in
+dark theme raises them for exactly this reason).
 
 ## Icons
 
@@ -60,3 +92,9 @@ vanilla DOM, not React.
 The built-in icons are stroke-drawn with `pathLength="1"`, which powers the
 draw-in animation. Custom stroke icons can opt in by adding
 `class="crust-draw"` and `pathLength="1"` to their paths.
+
+## Reduced motion
+
+Under `prefers-reduced-motion: reduce`, every entrance, exit and morph
+collapses to a fade — same durations, no movement. There's nothing to
+configure; it's a theme, not a degraded fallback.

@@ -3,17 +3,22 @@ layout: ../../layouts/DocsLayout.astro
 title: API
 ---
 
+Everything lives behind two imports: `toast` to fire notifications and
+`mountToaster` to render them. The React entry adds `<Toaster />` and
+`useToasts()` over the same store.
+
 ## `toast(message, options?)`
 
-Returns the toast's `id`.
+Fires a toast and returns its `id`.
 
-| Option     | Type                              | Default  | Notes                                            |
-| ---------- | --------------------------------- | -------- | ------------------------------------------------ |
-| `title`    | `string`                          | —        | Shown in the capsule; unlocks the morph-expand   |
-| `type`     | `'success' \| 'error' \| 'info' \| 'warning' \| 'loading'` | `'info'` | Picks the icon and its color |
-| `duration` | `number`                          | `4000`   | ms. `Infinity` (or `0`) never auto-dismisses     |
-| `icon`     | `string \| Element \| () => Element \| null` | per type | Overrides the icon; `null` hides it   |
-| `expandAfter` | `number` | — | ms after becoming visible until the toast auto-expands (needs `title`); restarts the dismiss timer when it fires |
+| Option        | Type                              | Default  | Notes                                            |
+| ------------- | --------------------------------- | -------- | ------------------------------------------------ |
+| `title`       | `string`                          | —        | Shown in the capsule; unlocks the morph-expand   |
+| `type`        | `'success' \| 'error' \| 'info' \| 'warning' \| 'loading'` | `'info'` | Picks the icon and its color |
+| `duration`    | `number`                          | `4000`   | ms. `Infinity` (or `0`) never auto-dismisses     |
+| `icon`        | `string \| Element \| () => Element \| null` | per type | Overrides the icon; `null` hides it   |
+| `expanded`    | `boolean`                         | `false`  | Arrive with the message panel already open (pinned) |
+| `expandAfter` | `number`                          | —        | ms after becoming visible until the toast auto-expands (needs `title`); restarts the dismiss timer when it fires |
 
 ### Shorthands
 
@@ -80,19 +85,50 @@ existing handle.
 Toasts beyond `maxVisible` queue, and a queued toast's timer only starts
 when it's promoted on screen — nothing expires unseen.
 
-## Behavior notes
+Options are read once at mount. To change `position` at runtime (the
+[playground](../../playground/) does this), unmount and remount — the store
+is untouched, so live toasts re-render into the new region:
 
-- **Morph-expand** — a toast with a `title` shows it in the compact capsule;
-  hover, focus or tap grows the same surface to reveal the message. The
-  auto-dismiss timer pauses while expanded or hovered.
-- **Accessibility** — the region is `role="status"` / `aria-live="polite"`;
-  every toast carries a keyboard-reachable dismiss button; all motion
-  collapses to fades under `prefers-reduced-motion`.
+```ts
+mountToaster().unmount();           // returns the active handle, then unmounts
+mountToaster({ position: 'top-center' });
+```
+
+## `toastStore` (low-level)
+
+Most apps never need this — it's the store both renderers sit on, exposed
+for badge counts, custom renderers and tests:
+
+```ts
+import { toastStore } from '@oscarrc/crust/vanilla';
+
+const unsubscribe = toastStore.subscribe((toasts) => { /* readonly Toast[] */ });
+toastStore.getSnapshot(); // current toasts
+toastStore.pause(id);     // freeze a dismiss timer
+toastStore.resume(id);    // continue where it left off
+toastStore.configure({ maxVisible: 3 });
+```
 
 ## `useToasts()` (React)
 
 Concurrent-safe read of the active toasts via `useSyncExternalStore` — for
 badge counts and the like. Rendering stays in the toaster.
+
+```tsx
+const toasts = useToasts(); // readonly Toast[]
+```
+
+## Behavior notes
+
+- **Morph-expand** — a toast with a `title` shows it in the compact capsule;
+  hover, focus or tap grows the same surface to reveal the message. The
+  auto-dismiss timer pauses while expanded or hovered.
+- **View transitions** — with Astro's `<ClientRouter />`, Crust re-adopts its
+  region after every swap, so live toasts (and their timers) carry straight
+  across page navigations.
+- **Accessibility** — the region is `role="status"` / `aria-live="polite"`;
+  every toast carries a keyboard-reachable dismiss button; all motion
+  collapses to fades under `prefers-reduced-motion`.
 
 ## Non-goals (v0)
 
