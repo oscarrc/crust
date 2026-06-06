@@ -1,6 +1,6 @@
 {
   "name": "@oscarrc/crust",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Don't throw the crust. An opinionated, crisp toast library built natively for Astro and React.",
   "license": "MIT",
   "author": "Oscar Rey",
