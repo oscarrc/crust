@@ -32,7 +32,6 @@ const base = import.meta.env.BASE_URL;
         <button class="btn" data-bake="info">Info</button>
         <button class="btn" data-bake="warning">Warning</button>
         <button class="btn" data-bake="promise">Promise (2s bake)</button>
-        <button class="btn" data-bake="expand">Expandable (hover it)</button>
         <button class="btn" data-bake="expand-after">Expand after 2s</button>
         <button class="btn" data-bake="persistent">Persistent</button>
         <button class="btn" data-bake="custom-icon">Custom lucide icon</button>
@@ -142,15 +141,6 @@ const base = import.meta.env.BASE_URL;
           }),
         },
         { expandOnSettle: true },
-      ),
-    expand: () =>
-      toast(
-        "Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.",
-        {
-          title: "Morph-expand",
-          type: "info",
-          duration: 10_000,
-        },
       ),
     "expand-after": () =>
       toast(

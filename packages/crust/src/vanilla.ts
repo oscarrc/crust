@@ -531,6 +531,24 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   };
 
   const updateCell = (entry: CellEntry, item: Toast) => {
+    const old = entry.item;
+    // Expansion is a command edge: only a CHANGE to expanded:true forces the
+    // panel open (re-issuing it on an already-expanded item is not an edge).
+    const newlyExpanded = item.expanded === true && old.expanded !== true;
+    const contentChanged =
+      item.message !== old.message ||
+      item.title !== old.title ||
+      item.type !== old.type ||
+      item.icon !== old.icon;
+
+    if (!contentChanged) {
+      // Nothing rendered has changed — act on the live element, exactly
+      // like a hover. No rebuild, no icon redraw.
+      entry.item = item;
+      if (newlyExpanded) applyExpansion(entry.el);
+      return;
+    }
+
     // Content changed (toast.update / toast.promise): rebuild the toast
     // element inside the same cell, carrying interaction state over.
     const fresh = buildToastEl(item);
@@ -543,9 +561,6 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
       );
       if (entry.el.dataset.pinned) fresh.dataset.pinned = entry.el.dataset.pinned;
     }
-    // Expansion is a command edge: only a CHANGE to expanded:true forces the
-    // panel open (re-issuing it on an already-expanded item is not an edge).
-    const newlyExpanded = item.expanded === true && entry.item.expanded !== true;
     entry.el.replaceWith(fresh);
     entry.el = fresh;
     entry.item = item;

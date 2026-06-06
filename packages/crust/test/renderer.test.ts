@@ -187,6 +187,15 @@ describe('store-driven expansion', () => {
     expect(el.dataset.pinned).toBeTruthy();
   });
 
+  test('expansion-only updates act on the live element, exactly like hover', () => {
+    const id = toast('details', { title: 'Later', duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    toast.update(id, { expanded: true });
+    // No content changed: the element must NOT be rebuilt/replaced.
+    expect(document.querySelector('.crust-toast')).toBe(el);
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+  });
+
   test('a user-collapsed toast stays collapsed through unrelated updates', () => {
     const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
