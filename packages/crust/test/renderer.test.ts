@@ -208,6 +208,33 @@ describe('store-driven expansion', () => {
   });
 });
 
+describe('exit while expanded', () => {
+  beforeEach(() => {
+    toaster = mountToaster();
+  });
+
+  test('closes the morph first, then exits as a capsule', () => {
+    const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    toast.dismiss(id);
+    // Phase 1: reverse morph — expansion closes, exit has not started.
+    expect(el.classList.contains('crust-expanded')).toBe(false);
+    expect(el.classList.contains('crust-leaving')).toBe(false);
+    expect(document.querySelectorAll('.crust-toast')).toHaveLength(1);
+    // Phase 2: after the morph duration the normal exit plays.
+    vi.advanceTimersByTime(280);
+    expect(el.classList.contains('crust-leaving')).toBe(true);
+    vi.advanceTimersByTime(500);
+    expect(document.querySelectorAll('.crust-toast')).toHaveLength(0);
+  });
+
+  test('collapsed toasts still exit immediately', () => {
+    const id = toast('plain capsule', { duration: Infinity });
+    toast.dismiss(id);
+    expect(document.querySelector('.crust-toast')!.classList.contains('crust-leaving')).toBe(true);
+  });
+});
+
 describe('warning and loading defaults', () => {
   beforeEach(() => {
     toaster = mountToaster();

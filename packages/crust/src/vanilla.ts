@@ -359,7 +359,12 @@ const DISMISS_ICON =
 /** Keep in sync with --crust-dur-* in styles.css; fallback removal guard. */
 const EXIT_FALLBACK_MS = 450;
 const ENTER_MS = 320;
+const MORPH_MS = 280;
 const STAGGER_MS = 50;
+
+const prefersReducedMotion = (): boolean =>
+  typeof matchMedia !== 'undefined' &&
+  matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const fromMarkup = (markup: string): Element | null => {
   const template = document.createElement('template');
@@ -571,22 +576,35 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     const { cell } = entry;
     if (cell.dataset.leaving) return;
     cell.dataset.leaving = '1';
-    entry.el.classList.add('crust-leaving');
-    cell.classList.remove('crust-shown');
 
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      cell.remove();
-      cells.delete(id);
+    const startExit = () => {
+      entry.el.classList.add('crust-leaving');
+      cell.classList.remove('crust-shown');
+
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        cell.remove();
+        cells.delete(id);
+      };
+      const fallback = setTimeout(finish, EXIT_FALLBACK_MS);
+      cell.addEventListener('transitionend', (event) => {
+        if (event.target !== cell) return;
+        clearTimeout(fallback);
+        finish();
+      });
     };
-    const fallback = setTimeout(finish, EXIT_FALLBACK_MS);
-    cell.addEventListener('transitionend', (event) => {
-      if (event.target !== cell) return;
-      clearTimeout(fallback);
-      finish();
-    });
+
+    if (entry.el.classList.contains('crust-expanded')) {
+      // The exit mirrors the opening: close the morph first, then leave
+      // as a capsule — never crush an open panel through the cell clip.
+      entry.el.classList.remove('crust-expanded');
+      delete entry.el.dataset.pinned;
+      setTimeout(startExit, prefersReducedMotion() ? 0 : MORPH_MS);
+    } else {
+      startExit();
+    }
   };
 
   const render = (toasts: readonly Toast[]) => {

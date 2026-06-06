@@ -1,0 +1,5 @@
+- [] Refactor javascript code to not be all in the same file. Split it up by feature and import it into the main file. This will make it easier to maintain and understand the codebase.
+- [] Refactor docs page to use Tailwind CSS for styling instead of custom CSS. This will make it easier to maintain and update the styles in the future.
+- [] Make the landing page more streamlined, just a couple of example plus react island.
+- [] Add a standalone playground page where the user can modify the toasts behaviour and launch toats for testing.
+- [] Add a quick "getting started" guide to the README with the most basic usage, and link to the docs for more details.
