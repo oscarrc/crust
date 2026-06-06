@@ -5,8 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   integrations: [react()],
-  site: 'https://oscarrc.github.io',
-  base: '/crust',
+  site: 'https://crust.oscarrc.me',
   vite: {
     resolve: {
       tsconfigPaths: true,

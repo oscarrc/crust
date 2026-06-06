@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Crust is a toast notification library (`@oscarrc/crust`) built Astro-first: the core renderer is vanilla DOM with zero dependencies, and React support is a thin optional bridge. pnpm monorepo with two workspaces:
 
 - `packages/crust` — the library (tsup + vitest)
-- `apps/docs` — Astro docs site / playground, deployed to GitHub Pages under base path `/crust`
+- `apps/docs` — Astro docs site / playground, deployed to GitHub Pages at `https://crust.oscarrc.me`
 
 ## Commands
 
@@ -63,4 +63,4 @@ Vitest with `happy-dom`. Tests use fake timers and reset shared state in `before
 
 ## Docs site
 
-Astro 6 + React islands + Tailwind 4. All internal links must account for the `/crust` base path.
+Astro 6 + React islands + Tailwind 4. Internal links use `import.meta.env.BASE_URL` (currently `/` — the site lives at the domain root `crust.oscarrc.me`).
