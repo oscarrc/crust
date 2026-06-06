@@ -1,0 +1,158 @@
+---
+// Docs shell in the spirit of Astro's classic docs example template:
+// markdown pages declare `layout:` frontmatter, this provides the
+// sidebar + prose chrome around the rendered content.
+import Layout from './Layout.astro';
+
+interface Props {
+  frontmatter: { title: string };
+}
+
+const { frontmatter } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const sidebar = [
+  { label: 'Getting started', href: `${base}docs/` },
+  { label: 'API', href: `${base}docs/api/` },
+  { label: 'Theming & icons', href: `${base}docs/theming/` }
+];
+
+const current = Astro.url.pathname.replace(/\/?$/, '/');
+---
+
+<Layout title={`${frontmatter.title} — Crust docs`}>
+  <main class="docs">
+    <aside class="docs-nav">
+      <nav aria-label="Docs">
+        <ul>
+          {
+            sidebar.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={current === item.href ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </aside>
+    <article class="prose">
+      <h1>{frontmatter.title}</h1>
+      <slot />
+    </article>
+  </main>
+</Layout>
+
+<style is:global>
+  .docs {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: var(--space-xl);
+    padding-top: var(--space-lg);
+    max-width: 960px;
+  }
+
+  @media (max-width: 720px) {
+    .docs {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+  }
+
+  .docs-nav nav {
+    position: sticky;
+    top: var(--space-lg);
+  }
+
+  .docs-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .docs-nav a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .docs-nav a:hover {
+    color: var(--crumb);
+  }
+
+  .docs-nav a[aria-current='page'] {
+    background: oklch(0.93 0.015 75);
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .prose {
+    min-width: 0;
+    max-width: 70ch;
+  }
+
+  .prose h1 {
+    font-size: 2.25rem;
+    margin-bottom: var(--space-lg);
+  }
+
+  .prose h2 {
+    font-size: 1.4rem;
+    margin: var(--space-xl) 0 var(--space-sm);
+  }
+
+  .prose h3 {
+    font-size: 1.05rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    margin: var(--space-lg) 0 var(--space-sm);
+  }
+
+  .prose p,
+  .prose li {
+    color: var(--ink-soft);
+  }
+
+  .prose pre {
+    background: oklch(0.3 0.02 60);
+    color: oklch(0.92 0.008 80);
+    padding: var(--space-md) 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+
+  .prose :not(pre) > code {
+    background: oklch(0.93 0.012 75);
+    padding: 1px 5px;
+    border-radius: 5px;
+    font-size: 0.85em;
+  }
+
+  .prose table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .prose th {
+    color: var(--ink);
+    font-weight: 600;
+  }
+</style>

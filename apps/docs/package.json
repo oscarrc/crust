@@ -1,0 +1,18 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@oscarrc/crust": "workspace:*",
+    "@astrojs/react": "^5.0.7",
+    "astro": "^6.4.4",
+    "lucide": "^1.17.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  }
+}

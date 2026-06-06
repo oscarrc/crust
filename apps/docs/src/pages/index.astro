@@ -1,0 +1,235 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Playground } from '../components/Playground';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout>
+  <main>
+    <section class="hero">
+      <h1>Don't throw<br />the crust.</h1>
+      <p class="lede">
+        An opinionated, crisp toast library built natively for Astro and
+        React. One store, one renderer, warm matte surfaces — and a capsule
+        that grows into a card as a single continuous surface.
+      </p>
+      <div class="hero-actions">
+        <button id="hero-bake" class="btn btn-primary">Bake a toast</button>
+        <a class="btn" href={`${base}docs/`}>Read the docs</a>
+      </div>
+    </section>
+
+    <section class="bakery">
+      <h2>The bakery</h2>
+      <p class="section-note">
+        These buttons are plain Astro <code>&lt;script&gt;</code> — zero React
+        in this execution path.
+      </p>
+      <div class="tray" id="vanilla-tray">
+        <button class="btn" data-bake="success">Success</button>
+        <button class="btn" data-bake="error">Error</button>
+        <button class="btn" data-bake="info">Info</button>
+        <button class="btn" data-bake="expand">Expandable (hover it)</button>
+        <button class="btn" data-bake="persistent">Persistent</button>
+        <button class="btn" data-bake="custom-icon">Custom lucide icon</button>
+        <button class="btn" data-bake="spam">Spam ×10</button>
+        <button class="btn" data-bake="dismiss">Dismiss all</button>
+      </div>
+
+      <Playground client:visible />
+
+      <p class="section-note">
+        Now navigate to the <a href={`${base}docs/`}>docs page</a> with a
+        toast still up — it survives the page transition. That's
+        <code>transition:persist</code> doing exactly what it promises.
+      </p>
+    </section>
+
+    <section class="why">
+      <h2>Why Crust</h2>
+      <ol class="why-list">
+        <li>
+          <h3>Astro-first, honestly</h3>
+          <p>
+            The renderer is vanilla DOM. A React-free Astro site renders
+            toasts with <code>mountToaster()</code> — React is an optional
+            peer, not a requirement.
+          </p>
+        </li>
+        <li>
+          <h3>One surface, growing</h3>
+          <p>
+            Hover a toast with a title and the capsule morphs into a card —
+            constant radius, one container, no second panel bolted on.
+          </p>
+        </li>
+        <li>
+          <h3>Nothing waits</h3>
+          <p>
+            Entrances land in 320ms, exits in 200, and interaction is never
+            blocked. Timers pause while you read. Reduced motion is a theme,
+            not an afterthought.
+          </p>
+        </li>
+        <li>
+          <h3>Your site's voice wins</h3>
+          <p>
+            Fonts inherit from the host page and every color, radius and
+            duration is a <code>--crust-*</code> custom property away.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="install">
+      <h2>Install</h2>
+      <pre class="code-block"><code>pnpm add @oscarrc/crust</code></pre>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  import { toast } from '@oscarrc/crust/vanilla';
+  import { createElement, Croissant } from 'lucide';
+
+  const bakes: Record<string, () => void> = {
+    success: () =>
+      toast.success('Fresh bread out of the oven.', { title: 'Bakery live' }),
+    error: () =>
+      toast.error('The loaf did not survive.', { title: 'Burnt toast' }),
+    info: () => toast.info('Proofing takes as long as it takes.'),
+    expand: () =>
+      toast('Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.', {
+        title: 'Morph-expand',
+        type: 'info',
+        duration: 10_000
+      }),
+    persistent: () =>
+      toast('This one stays until you dismiss it.', {
+        title: 'No timer',
+        duration: 0
+      }),
+    'custom-icon': () =>
+      toast.success('Any lucide icon, or your own SVG.', {
+        title: 'Croissant mode',
+        icon: () => createElement(Croissant)
+      }),
+    spam: () => {
+      for (let i = 1; i <= 10; i++) {
+        toast(`Order #${i} out of the oven.`, { title: `Batch bake ${i}/10` });
+      }
+    },
+    dismiss: () => toast.dismiss()
+  };
+
+  document.getElementById('hero-bake')?.addEventListener('click', bakes.success!);
+  document.getElementById('vanilla-tray')?.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('[data-bake]');
+    if (button) bakes[button.dataset.bake!]?.();
+  });
+</script>
+
+<style>
+  .hero {
+    padding: var(--space-2xl) 0 var(--space-xl);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.75rem, 8vw, 4.5rem);
+    letter-spacing: -0.01em;
+  }
+
+  .lede {
+    max-width: 56ch;
+    font-size: 1.125rem;
+    color: var(--ink-soft);
+    margin: var(--space-lg) 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  section + section {
+    margin-top: var(--space-2xl);
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .section-note {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    max-width: 60ch;
+  }
+
+  .tray {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin: var(--space-md) 0 var(--space-lg);
+  }
+
+  .island {
+    border: 1px dashed var(--crumb);
+    border-radius: 10px;
+    padding: var(--space-md) 20px;
+    max-width: 480px;
+  }
+
+  .island-label {
+    margin: 0 0 var(--space-sm);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--crumb);
+  }
+
+  .island-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .why-list {
+    list-style: none;
+    counter-reset: why;
+    margin: var(--space-lg) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .why-list li {
+    counter-increment: why;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    column-gap: var(--space-md);
+    max-width: 64ch;
+  }
+
+  .why-list li::before {
+    content: counter(why, decimal-leading-zero);
+    font-family: var(--font-mono);
+    color: var(--crumb);
+    font-size: 0.9rem;
+    padding-top: 0.45rem;
+  }
+
+  .why-list h3 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+
+  .why-list p {
+    grid-column: 2;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+</style>
