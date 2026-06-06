@@ -74,6 +74,17 @@ Renderer (`test/renderer.test.ts`):
 - Click collapses a store-expanded toast.
 - `expandAfter` on a title-less toast is a no-op.
 
+## Docs & playground
+
+- `docs/api.md`: `expandAfter` row in the `toast()` options table; the
+  Promises section gains `expandOnSettle` in its example and a sentence on
+  the restart-timer semantics; `expanded` mentioned as the low-level
+  primitive next to `toastStore`.
+- Playground (`index.astro`): new "Expand after 2s" button
+  (`expandAfter: 2000`); the existing promise demo gains
+  `expandOnSettle: true` so the outcome opens itself.
+- README: one-liner for both options in the API-at-a-glance block.
+
 ## Out of scope
 
 - Documenting `expanded: false` as a public collapse command.
