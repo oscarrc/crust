@@ -30,6 +30,8 @@ const base = import.meta.env.BASE_URL;
         <button class="btn" data-bake="success">Success</button>
         <button class="btn" data-bake="error">Error</button>
         <button class="btn" data-bake="info">Info</button>
+        <button class="btn" data-bake="warning">Warning</button>
+        <button class="btn" data-bake="promise">Promise (2s bake)</button>
         <button class="btn" data-bake="expand">Expandable (hover it)</button>
         <button class="btn" data-bake="persistent">Persistent</button>
         <button class="btn" data-bake="custom-icon">Custom lucide icon</button>
@@ -99,6 +101,22 @@ const base = import.meta.env.BASE_URL;
     error: () =>
       toast.error('The loaf did not survive.', { title: 'Burnt toast' }),
     info: () => toast.info('Proofing takes as long as it takes.'),
+    warning: () =>
+      toast.warning('The oven is running hot.', { title: 'Mind the heat' }),
+    promise: () =>
+      toast.promise(
+        new Promise<string>((resolve, reject) =>
+          setTimeout(
+            () => (Math.random() > 0.3 ? resolve('sourdough') : reject(new Error('it collapsed'))),
+            2000
+          )
+        ),
+        {
+          loading: { message: 'In the oven…', title: 'Baking' },
+          success: (loaf) => ({ message: `One ${loaf}, golden brown.`, title: 'Fresh bake' }),
+          error: (e) => ({ message: `No loaf today — ${(e as Error).message}.`, title: 'Bake failed' })
+        }
+      ),
     expand: () =>
       toast('Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.', {
         title: 'Morph-expand',

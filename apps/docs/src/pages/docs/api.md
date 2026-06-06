@@ -10,7 +10,7 @@ Returns the toast's `id`.
 | Option     | Type                              | Default  | Notes                                            |
 | ---------- | --------------------------------- | -------- | ------------------------------------------------ |
 | `title`    | `string`                          | —        | Shown in the capsule; unlocks the morph-expand   |
-| `type`     | `'success' \| 'error' \| 'info'`  | `'info'` | Picks the icon and its color                     |
+| `type`     | `'success' \| 'error' \| 'info' \| 'warning' \| 'loading'` | `'info'` | Picks the icon and its color |
 | `duration` | `number`                          | `4000`   | ms. `Infinity` (or `0`) never auto-dismisses     |
 | `icon`     | `string \| Element \| () => Element \| null` | per type | Overrides the icon; `null` hides it   |
 
@@ -20,6 +20,32 @@ Returns the toast's `id`.
 toast.success('Saved');
 toast.error('That broke.');
 toast.info('Heads up.');
+toast.warning('Careful with that.');
+toast.loading('Working…'); // persistent until updated or dismissed
+```
+
+### Updating
+
+Patch a live (or still-queued) toast in place — the surface re-renders
+inside the same cell, and a new `duration` restarts the timer from now:
+
+```ts
+const id = toast.loading('Uploading…');
+toast.update(id, { message: 'Uploaded', type: 'success', duration: 4000 });
+```
+
+### Promises
+
+Sugar over `loading` + `update`: shows a spinner toast, then morphs it into
+the outcome when the promise settles. `success`/`error` accept a string, a
+`{ message, title }` object, or a function of the value/reason:
+
+```ts
+toast.promise(saveDraft(), {
+  loading: 'Saving draft…',
+  success: (draft) => `Saved “${draft.title}”`,
+  error: (e) => `Save failed: ${(e as Error).message}`
+});
 ```
 
 ### Dismissing
@@ -61,6 +87,6 @@ badge counts and the like. Rendering stays in the toaster.
 
 ## Non-goals (v0)
 
-Deliberately not included: `toast.promise()`, `toast.update()`, JSX toast
-content, a `warning` type. Crust is opinionated — if these are essential,
-[sonner](https://sonner.emilkowal.ski) is excellent.
+Deliberately not included: JSX toast content (the renderer is vanilla DOM —
+that's what makes the React-free story work). Everything else you'd expect
+is in.

@@ -105,7 +105,17 @@ export function Dashboard() {
 
 ```ts
 toast('message', { title, type, duration, icon });
-toast.success('…'); toast.error('…'); toast.info('…');
+toast.success('…'); toast.error('…'); toast.info('…'); toast.warning('…');
+
+const id = toast.loading('Uploading…');          // persistent spinner
+toast.update(id, { message: 'Done', type: 'success', duration: 4000 });
+
+toast.promise(save(), {                           // loading → success/error
+  loading: 'Saving…',
+  success: (v) => `Saved ${v.name}`,
+  error: 'Save failed'
+});
+
 toast.dismiss(id);  // one
 toast.dismiss();    // all, queue included
 
@@ -119,8 +129,9 @@ mountToaster({ position: 'bottom-right', maxVisible: 5, icons: { … } });
 
 ## Non-goals
 
-Deliberately not in scope: `toast.promise()`, `toast.update()`, JSX toast
-content, a `warning` type. Opinionated means opinionated.
+Deliberately not in scope: JSX toast content — the renderer is vanilla DOM,
+which is exactly what makes the React-free story work. Opinionated means
+opinionated.
 
 ## Development
 
