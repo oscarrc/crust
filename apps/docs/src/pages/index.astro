@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { Playground } from '../components/Playground';
+import Layout from "../layouts/Layout.astro";
+import { Playground } from "../components/Playground";
 
 const base = import.meta.env.BASE_URL;
 ---
@@ -10,9 +10,9 @@ const base = import.meta.env.BASE_URL;
     <section class="hero">
       <h1>Don't throw<br />the crust.</h1>
       <p class="lede">
-        An opinionated, crisp toast library built natively for Astro and
-        React. One store, one renderer, warm matte surfaces — and a capsule
-        that grows into a card as a single continuous surface.
+        An opinionated, crisp toast library built natively for Astro and React.
+        One store, one renderer, warm matte surfaces — and a capsule that grows
+        into a card as a single continuous surface.
       </p>
       <div class="hero-actions">
         <button id="hero-bake" class="btn btn-primary">Bake a toast</button>
@@ -23,8 +23,8 @@ const base = import.meta.env.BASE_URL;
     <section class="bakery">
       <h2>The bakery</h2>
       <p class="section-note">
-        These buttons are plain Astro <code>&lt;script&gt;</code> — zero React
-        in this execution path.
+        These buttons are plain Astro <code>&lt;script&gt;</code> — zero React in
+        this execution path.
       </p>
       <div class="tray" id="vanilla-tray">
         <button class="btn" data-bake="success">Success</button>
@@ -42,8 +42,8 @@ const base = import.meta.env.BASE_URL;
       <Playground client:visible />
 
       <p class="section-note">
-        Now navigate to the <a href={`${base}docs/`}>docs page</a> with a
-        toast still up — it survives the page transition. That's
+        Now navigate to the <a href={`${base}docs/`}>docs page</a> with a toast still
+        up — it survives the page transition. That's
         <code>transition:persist</code> doing exactly what it promises.
       </p>
     </section>
@@ -54,9 +54,8 @@ const base = import.meta.env.BASE_URL;
         <li>
           <h3>Astro-first, honestly</h3>
           <p>
-            The renderer is vanilla DOM. A React-free Astro site renders
-            toasts with <code>mountToaster()</code> — React is an optional
-            peer, not a requirement.
+            The renderer is vanilla DOM. A React-free Astro site renders toasts
+            with <code>mountToaster()</code> — React is an optional peer, not a requirement.
           </p>
         </li>
         <li>
@@ -70,8 +69,8 @@ const base = import.meta.env.BASE_URL;
           <h3>Nothing waits</h3>
           <p>
             Entrances land in 320ms, exits in 200, and interaction is never
-            blocked. Timers pause while you read. Reduced motion is a theme,
-            not an afterthought.
+            blocked. Timers pause while you read. Reduced motion is a theme, not
+            an afterthought.
           </p>
         </li>
         <li>
@@ -92,60 +91,78 @@ const base = import.meta.env.BASE_URL;
 </Layout>
 
 <script>
-  import { toast } from '@oscarrc/crust/vanilla';
-  import { createElement, Croissant } from 'lucide';
+  import { toast } from "@oscarrc/crust/vanilla";
+  import { createElement, Croissant } from "lucide";
 
   const bakes: Record<string, () => void> = {
     success: () =>
-      toast.success('Fresh bread out of the oven.', { title: 'Bakery live' }),
+      toast.success("Fresh bread out of the oven.", { title: "Bakery live" }),
     error: () =>
-      toast.error('The loaf did not survive.', { title: 'Burnt toast' }),
-    info: () => toast.info('Proofing takes as long as it takes.'),
+      toast.error("The loaf did not survive.", { title: "Burnt toast" }),
+    info: () => toast.info("Proofing takes as long as it takes."),
     warning: () =>
-      toast.warning('The oven is running hot.', { title: 'Mind the heat' }),
+      toast.warning("The oven is running hot.", { title: "Mind the heat" }),
     promise: () =>
       toast.promise(
         new Promise<string>((resolve, reject) =>
           setTimeout(
-            () => (Math.random() > 0.3 ? resolve('sourdough') : reject(new Error('it collapsed'))),
-            2000
-          )
+            () =>
+              Math.random() > 0.3
+                ? resolve("sourdough")
+                : reject(new Error("it collapsed")),
+            2000,
+          ),
         ),
         {
-          loading: { message: 'In the oven…', title: 'Baking' },
-          success: (loaf) => ({ message: `One ${loaf}, golden brown.`, title: 'Fresh bake' }),
-          error: (e) => ({ message: `No loaf today — ${(e as Error).message}.`, title: 'Bake failed' })
-        }
+          loading: { message: "In the oven…", title: "Baking" },
+          success: (loaf) => ({
+            message: `One ${loaf}, golden brown.`,
+            title: "Fresh bake",
+          }),
+          error: (e) => ({
+            message: `No loaf today — ${(e as Error).message}.`,
+            title: "Bake failed",
+          }),
+        },
       ),
     expand: () =>
-      toast('Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.', {
-        title: 'Morph-expand',
-        type: 'info',
-        duration: 10_000
-      }),
+      toast(
+        "Hover or focus this toast and watch the capsule grow into a card — one surface, constant corners, message revealed. Click to pin it open.",
+        {
+          title: "Morph-expand",
+          type: "info",
+          duration: 10_000,
+        },
+      ),
     persistent: () =>
-      toast('This one stays until you dismiss it.', {
-        title: 'No timer',
-        duration: 0
+      toast("This one stays until you dismiss it.", {
+        title: "No timer",
+        duration: 0,
       }),
-    'custom-icon': () =>
-      toast.success('Any lucide icon, or your own SVG.', {
-        title: 'Croissant mode',
-        icon: () => createElement(Croissant)
+    "custom-icon": () =>
+      toast.success("Any lucide icon, or your own SVG.", {
+        title: "Croissant mode",
+        icon: () => createElement(Croissant),
       }),
     spam: () => {
       for (let i = 1; i <= 10; i++) {
         toast(`Order #${i} out of the oven.`, { title: `Batch bake ${i}/10` });
       }
     },
-    dismiss: () => toast.dismiss()
+    dismiss: () => toast.dismiss(),
   };
 
-  document.getElementById('hero-bake')?.addEventListener('click', bakes.success!);
-  document.getElementById('vanilla-tray')?.addEventListener('click', (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLElement>('[data-bake]');
-    if (button) bakes[button.dataset.bake!]?.();
-  });
+  document
+    .getElementById("hero-bake")
+    ?.addEventListener("click", bakes.success!);
+  document
+    .getElementById("vanilla-tray")
+    ?.addEventListener("click", (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLElement>(
+        "[data-bake]",
+      );
+      if (button) bakes[button.dataset.bake!]?.();
+    });
 </script>
 
 <style>

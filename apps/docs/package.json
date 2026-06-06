@@ -8,11 +8,15 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@oscarrc/crust": "workspace:*",
     "@astrojs/react": "^5.0.7",
+    "@oscarrc/crust": "workspace:*",
     "astro": "^6.4.4",
     "lucide": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3"
   }
 }
