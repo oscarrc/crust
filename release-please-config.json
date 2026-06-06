@@ -4,6 +4,7 @@
     "packages/crust": {
       "release-type": "node",
       "package-name": "@oscarrc/crust",
+      "initial-version": "0.1.0",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
     }
