@@ -1,6 +1,7 @@
 {
   "name": "crust-monorepo",
   "private": true,
+  "packageManager": "pnpm@11.3.0",
   "scripts": {
     "build": "pnpm build:lib && pnpm build:docs",
     "build:lib": "pnpm --filter @oscarrc/crust build",
