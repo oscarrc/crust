@@ -1,23 +1,26 @@
-name: CI
+name: CI Docs
 
+# Docs import the built library dist, so lib changes also trigger this check.
 on:
   push:
     branches: [main]
     paths:
+      - 'apps/docs/**'
       - 'packages/crust/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-docs.yml'
   pull_request:
     branches: [main]
     paths:
+      - 'apps/docs/**'
       - 'packages/crust/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-docs.yml'
 
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +31,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:lib
-      - run: pnpm test
-      - run: pnpm check:pkg
+      - run: pnpm build:docs

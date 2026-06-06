@@ -31,7 +31,7 @@ pnpm vitest        # watch mode
 
 The docs app also has `pnpm check` (astro check + tsc) inside `apps/docs/`.
 
-CI runs: install → `build:lib` → `test` → `check:pkg` → `build:docs`. Note `build:docs` needs `build:lib` first — docs import the built `dist/`.
+CI is path-filtered per workspace: `ci.yml` (lib: `build:lib` → `test` → `check:pkg`) runs on `packages/crust` changes; `ci-docs.yml` and `deploy-docs.yml` (`build:lib` → `build:docs`) run on `apps/docs` *or* `packages/crust` changes — docs import the built `dist/`, so lib changes retrigger them. Lockfile/workspace changes trigger everything. `release.yml` is unfiltered: release-please path-scopes by its own config, and the publish job re-runs build+test as the gate before npm.
 
 ## Releases
 

@@ -1,8 +1,15 @@
 name: Deploy Showcase
 
+# Docs import the built library dist, so lib changes also trigger a deploy.
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/docs/**'
+      - 'packages/crust/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:
