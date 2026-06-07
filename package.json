@@ -9,6 +9,7 @@
     "dev": "pnpm --parallel --filter @oscarrc/crust --filter docs dev",
     "dev:docs": "pnpm --filter docs dev",
     "test": "pnpm --filter @oscarrc/crust test",
+    "test:browser": "pnpm --filter @oscarrc/crust test:browser",
     "check:pkg": "pnpm --filter @oscarrc/crust check:pkg"
   }
 }
