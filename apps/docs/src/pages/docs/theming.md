@@ -5,7 +5,7 @@ title: Theming & icons
 
 Crust ships a warm matte theme with automatic dark mode, and assumes you'll
 want to make it yours. Every token is a CSS custom property on
-`.crust-region` — override what you need, keep the rest. Typography always
+`.crust-region`: override what you need, keep the rest. Typography always
 inherits from your page; Crust never loads a font.
 
 ## Custom properties
@@ -32,27 +32,27 @@ inherits from your page; Crust never loads a font.
 | Shape       | `--crust-radius`, `--crust-width`, `--crust-offset`, `--crust-z` |
 | Motion      | `--crust-ease`, `--crust-ease-exit`, `--crust-dur-in`, `--crust-dur-morph`, `--crust-dur-out` |
 
-Semantic color is deliberately confined to the icon strokes — surfaces stay
+Semantic color is deliberately confined to the icon strokes. Surfaces stay
 neutral, text stays ink. If you override the semantic tokens, they'll still
 only color the icons.
 
 ## Dark mode
 
 Out of the box, Crust follows the operating system through
-`prefers-color-scheme` — no setup, no flash.
+`prefers-color-scheme`, with no setup and no flash.
 
 If your site has its own theme toggle (a `.dark` class on `<html>` is the
 common pattern), take over both halves explicitly. Your stylesheet loads
 after Crust's, so flat declarations win the cascade over its media query:
 
 ```css
-/* Pin the light theme regardless of OS… */
+/* Pin the light theme regardless of OS... */
 .crust-region {
   --crust-surface: oklch(0.98 0.005 75);
   --crust-ink: oklch(0.28 0.012 75);
 }
 
-/* …and switch on your class instead. */
+/* ...and switch on your class instead. */
 .dark .crust-region {
   --crust-surface: oklch(0.26 0.01 60);
   --crust-ink: oklch(0.93 0.008 80);
@@ -60,7 +60,7 @@ after Crust's, so flat declarations win the cascade over its media query:
 }
 ```
 
-Two notes from experience: dark mode is not inverted light mode — keep your
+Two notes from experience: dark mode is not inverted light mode. Keep your
 hue family and let depth come from surface lightness, not shadows. And
 semantic colors want a little more lightness on dark surfaces (the built-in
 dark theme raises them for exactly this reason).
@@ -77,7 +77,7 @@ import { createElement, Croissant, Flame } from 'lucide';
 mountToaster({
   icons: {
     success: () => createElement(Croissant),
-    error: '<svg viewBox="0 0 24 24">…</svg>'
+    error: '<svg viewBox="0 0 24 24">...</svg>'
   }
 });
 
@@ -86,7 +86,7 @@ toast('No icon at all', { icon: null });
 ```
 
 Works with [`lucide`](https://lucide.dev) (vanilla) and `lucide-static`
-(strings). `lucide-react` JSX components won't work — the renderer is
+(strings). `lucide-react` JSX components won't work because the renderer is
 vanilla DOM, not React.
 
 The built-in icons are stroke-drawn with `pathLength="1"`, which powers the
@@ -96,5 +96,5 @@ draw-in animation. Custom stroke icons can opt in by adding
 ## Reduced motion
 
 Under `prefers-reduced-motion: reduce`, every entrance, exit and morph
-collapses to a fade — same durations, no movement. There's nothing to
+collapses to a fade: same durations, no movement. There's nothing to
 configure; it's a theme, not a degraded fallback.

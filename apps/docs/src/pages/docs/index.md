@@ -7,7 +7,7 @@ title: Getting started
 > toaster across an Astro view transition. Nothing re-mounted, no timer reset.
 
 Crust is a toast library with one store and one renderer. The renderer is
-vanilla DOM, so it runs anywhere a `<script>` runs — a React-free Astro site
+vanilla DOM, so it runs anywhere a `<script>` runs. A React-free Astro site
 is a first-class citizen, not a fallback. React support is a thin component
 over the same machinery.
 
@@ -17,7 +17,7 @@ over the same machinery.
 pnpm add @oscarrc/crust
 ```
 
-Crust has zero hard dependencies. React is an optional peer — install it only
+Crust has zero hard dependencies. React is an optional peer; install it only
 if you use the React entry point.
 
 Include the stylesheet once, wherever your global styles live:
@@ -26,7 +26,7 @@ Include the stylesheet once, wherever your global styles live:
 import '@oscarrc/crust/styles.css';
 ```
 
-## 1. Pure Astro — no React anywhere
+## 1. Pure Astro, no React anywhere
 
 Mount the toaster once in your layout, then trigger toasts from any script on
 any page:
@@ -51,7 +51,7 @@ import '@oscarrc/crust/styles.css';
 <button data-save>Save</button>
 <script>
   import { toast } from '@oscarrc/crust/vanilla';
-  // Delegate from `document` — with Astro view transitions, listeners
+  // Delegate from `document`: with Astro view transitions, listeners
   // bound to specific elements die when the <body> is swapped.
   document.addEventListener('click', (event) => {
     if (!(event.target as HTMLElement).closest('[data-save]')) return;
@@ -60,14 +60,14 @@ import '@oscarrc/crust/styles.css';
 </script>
 ```
 
-`mountToaster()` is idempotent — calling it twice returns the same handle, so
+`mountToaster()` is idempotent. Calling it twice returns the same handle, so
 you never end up with two toasters.
 
 ## 2. Astro with React islands
 
 Use the `<Toaster />` component instead of `mountToaster()`. With Astro view
-transitions (`<ClientRouter />`), add `transition:persist` so the island —
-and any live toasts, timers included — survives page navigation:
+transitions (`<ClientRouter />`), add `transition:persist` so the island,
+including live toasts and their timers, survives page navigation:
 
 ```astro
 ---
@@ -84,7 +84,7 @@ import '@oscarrc/crust/styles.css';
 </html>
 ```
 
-Triggers work identically from islands and plain scripts — it's one shared
+Triggers work identically from islands and plain scripts. It's one shared
 store:
 
 ```tsx
@@ -101,13 +101,13 @@ export function Dashboard() {
 }
 ```
 
-The badge on the [landing page](../) works exactly like this — vanilla
+The badge on the [landing page](../) works exactly like this: vanilla
 buttons and a React island feeding one store.
 
 ## 3. Plain React apps
 
 Crust isn't Astro-exclusive. Mount `<Toaster />` once near your app root and
-call `toast()` from anywhere — no provider, no context:
+call `toast()` from anywhere. No provider, no context:
 
 ```tsx
 import { Toaster } from '@oscarrc/crust/react';
@@ -138,6 +138,6 @@ toast.error('Burnt', { message: 'It did not.', duration: 8000 });
 ```
 
 Give a toast a `message` and it gains Crust's signature move: the compact
-capsule morphs into a card on hover, focus or tap — one continuous surface,
+capsule morphs into a card on hover, focus or tap: one continuous surface,
 message revealed. Head to the [API](./api/) for everything else, or the
 [playground](../playground/) to try every option live.

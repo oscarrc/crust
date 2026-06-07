@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { Playground } from "../components/Playground";
 
-// BASE_URL has no trailing slash by default — normalize so `${base}docs/` works.
+// BASE_URL has no trailing slash by default. Normalize so `${base}docs/` works.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
@@ -16,8 +16,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       </h1>
       <p class="my-8 max-w-[56ch] text-lg text-ink-soft">
         An opinionated, crisp toast library built natively for Astro and React.
-        One store, one renderer, warm matte surfaces — and a capsule that grows
-        into a card as a single continuous surface.
+        One store, one renderer, warm matte surfaces. A capsule grows into a
+        card as a single continuous surface.
       </p>
       <div class="flex flex-wrap items-center gap-4">
         <button class="btn btn-primary" data-bake="success">Bake a toast</button
@@ -62,7 +62,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       </h2>
       <p class="m-0 max-w-[60ch] text-sm text-ink-soft">
         Every kind of toast, fired from a plain Astro
-        <code class="font-mono text-[0.85em]">&lt;script&gt;</code> — zero React in
+        <code class="font-mono text-[0.85em]">&lt;script&gt;</code>, with zero React in
         this execution path.
       </p>
       <div class="mt-4 mb-8 flex flex-wrap gap-2">
@@ -83,7 +83,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         Now navigate to the <a
           class="text-crumb underline decoration-1 underline-offset-3"
           href={`${base}docs/`}>docs page</a
-        > with a toast still up — it survives the page transition. Crust re-adopts
+        > with a toast still up. It survives the page transition. Crust re-adopts
         its toaster across Astro's view-transition swaps, timers and all.
       </p>
     </section>
@@ -99,7 +99,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           </h3>
           <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             The renderer is vanilla DOM. A React-free Astro site renders toasts
-            with <code class="font-mono text-[0.85em]">mountToaster()</code> — React
+            with <code class="font-mono text-[0.85em]">mountToaster()</code>. React
             is an optional peer, not a requirement.
           </p>
         </li>
@@ -108,7 +108,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
             One surface, growing
           </h3>
           <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
-            Hover a toast with a message and the capsule morphs into a card —
+            Hover a toast with a message and the capsule morphs into a card:
             constant radius, one container, no second panel bolted on.
           </p>
         </li>
@@ -138,7 +138,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 </Layout>
 
 <style>
-  /* Editorial numbering — CSS counters read better as a scoped rule than
+  /* Editorial numbering: CSS counters read better as a scoped rule than
      as a string of arbitrary-value utilities. */
   .why-list {
     counter-reset: why;
@@ -178,8 +178,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     warning: () =>
       toast.warning("Mind the heat", { message: "The oven is running hot." }),
     loading: () => {
-      // Loading toasts persist until updated — prove toast.update too.
-      const id = toast.loading("Patience", { message: "Proofing the dough…" });
+      // Loading toasts persist until updated, proving toast.update too.
+      const id = toast.loading("Patience", { message: "Proofing the dough..." });
       setTimeout(
         () =>
           toast.update(id, {
@@ -203,21 +203,21 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           ),
         ),
         {
-          loading: { title: "Baking", message: "In the oven…" },
+          loading: { title: "Baking", message: "In the oven..." },
           success: (loaf) => ({
             title: "Fresh bake",
             message: `One ${loaf}, golden brown.`,
           }),
           error: (e) => ({
             title: "Bake failed",
-            message: `No loaf today — ${(e as Error).message}.`,
+            message: `No loaf today: ${(e as Error).message}.`,
           }),
         },
         { expandOnSettle: true },
       ),
-    // Without a message the title rides the capsule alone —
+    // Without a message the title rides the capsule alone.
     // nothing left hidden, so there's nothing to expand into.
-    plain: () => toast("A bare capsule — no message, no expansion."),
+    plain: () => toast("A bare capsule: no message, no expansion."),
     "custom-icon": () =>
       toast.success("Croissant mode", {
         message: "Any lucide icon, or your own SVG.",
@@ -231,7 +231,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   };
 
   // Delegate at the document level: this script runs once per full page
-  // load, and ClientRouter swaps the <body> on navigation — listeners bound
+  // load, and ClientRouter swaps the <body> on navigation. Listeners bound
   // to specific elements would die on the first round trip.
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
@@ -250,7 +250,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         )
         .catch(() =>
           toast.error("No luck", {
-            message: "Clipboard said no — copy it by hand.",
+            message: "Clipboard said no. Copy it by hand.",
           }),
         );
     }

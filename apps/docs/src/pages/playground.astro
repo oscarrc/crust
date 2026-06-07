@@ -7,14 +7,14 @@ const labelClass = "mb-1.5 block text-sm font-medium text-ink";
 const hintClass = "mt-1.5 text-xs text-ink-soft";
 ---
 
-<Layout title="Playground — Crust">
+<Layout title="Playground - Crust">
   <main class="mx-auto w-full max-w-[960px] flex-1 px-[clamp(16px,5vw,64px)]">
     <section class="pt-16 pb-12">
       <h1 class="m-0 font-display text-[clamp(2rem,5vw,3rem)] font-normal">
         The baking room
       </h1>
       <p class="mt-4 mb-0 max-w-[56ch] text-ink-soft">
-        Every option Crust knows, in one form. Dial it in, bake, repeat — the
+        Every option Crust knows, in one form. Dial it in, bake, repeat. The
         code below always matches what you're about to fire.
       </p>
     </section>
@@ -43,7 +43,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
             >Golden brown and ready to serve.</textarea
           >
           <p class={hintClass}>
-            A message unlocks the morph-expand. Clear it for a plain capsule.
+            A message enables the morph-expand. Clear it for a plain capsule.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
           </div>
         </div>
         <p class="-mt-3 text-xs text-ink-soft">
-          Type picks the stroke icon and its color — surfaces stay neutral.
+          Type picks the stroke icon and its color. Surfaces stay neutral.
         </p>
       </div>
 
@@ -138,7 +138,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
           </div>
         </div>
         <p class="-mt-3 text-xs text-ink-soft">
-          Toaster options apply immediately — the region remounts in place and
+          Toaster options apply immediately. The region remounts in place and
           live toasts ride along.
         </p>
 
@@ -178,8 +178,8 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
           </svg>
         </button>
         <p class="mt-3 mb-0 text-xs text-ink-soft">
-          Spam the bake button — batches stagger in, and anything beyond “max
-          visible” waits its turn.
+          Spam the bake button. Batches stagger in, and anything beyond "max
+          visible" waits its turn.
         </p>
       </div>
     </form>
@@ -227,7 +227,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
     if (!el) return;
     const data = new FormData(el);
     settings.type = (data.get("type") as ToastType) ?? DEFAULTS.type;
-    // The title is mandatory — an emptied field falls back to the default.
+    // The title is mandatory. An emptied field falls back to the default.
     settings.title = (data.get("title") as string) || DEFAULTS.title;
     settings.message = (data.get("message") as string) ?? "";
     settings.duration = Number(data.get("duration") ?? DEFAULTS.duration);
@@ -294,7 +294,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
       opts.push("icon: () => createElement(Croissant)");
     if (settings.icon === "none") opts.push("icon: null");
 
-    // Always the shorthand — it reads like the docs and carries the type.
+    // Always the shorthand: it reads like the docs and carries the type.
     const call = `toast.${settings.type}`;
     const title = JSON.stringify(settings.title);
     const body =
@@ -317,7 +317,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
     if (wanted === mountedWith) return;
     mountedWith = wanted;
     // Public API only: grab the active handle, swap the toaster in place.
-    // The store is untouched — live toasts re-render into the new region.
+    // The store is untouched. Live toasts re-render into the new region.
     mountToaster().unmount();
     mountToaster({
       position: settings.position,
@@ -358,7 +358,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
     const target = event.target as HTMLElement;
 
     if (target.closest("[data-bake-config]")) {
-      event.preventDefault(); // inside a <form> — don't submit/navigate
+      event.preventDefault(); // inside a <form>, don't submit/navigate
       bake();
     }
 
@@ -372,7 +372,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
         )
         .catch(() =>
           toast.error("No luck", {
-            message: "Clipboard said no — copy it by hand.",
+            message: "Clipboard said no. Copy it by hand.",
           }),
         );
     }

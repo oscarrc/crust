@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Crust docs — Tailwind v4 theme.
+   Crust docs: Tailwind v4 theme.
    Warm matte paper in the light; dark bread-crust at night.
    Light values carried over from the original brand sheet; the dark theme
-   keeps the same hue family (crumb-brown 60, paper 80) — never gray-blue.
+   keeps the same hue family (crumb-brown 60, paper 80), never gray-blue.
    ========================================================================== */
 
 @import "tailwindcss";
@@ -16,7 +16,7 @@
   --ink: oklch(0.28 0.02 60);
   --ink-soft: oklch(0.45 0.018 60);
   --line: oklch(0.88 0.012 75);
-  --crumb: oklch(0.52 0.1 60); /* crust brown — the docs accent */
+  --crumb: oklch(0.52 0.1 60); /* crust brown, the docs accent */
   --herb: oklch(0.55 0.12 150);
   --shadow-color: oklch(0.2 0.01 75);
   color-scheme: light;
@@ -30,7 +30,7 @@
   --ink: oklch(0.93 0.01 80);
   --ink-soft: oklch(0.71 0.014 70);
   --line: oklch(0.32 0.012 60);
-  --crumb: oklch(0.74 0.09 65); /* toasted gold — readable on dark crust */
+  --crumb: oklch(0.74 0.09 65); /* toasted gold, readable on dark crust */
   --herb: oklch(0.72 0.11 150);
   --shadow-color: oklch(0 0 0);
   color-scheme: dark;
@@ -64,7 +64,7 @@
 /* Toasts follow the site toggle, not the OS. Declared after the library
    sheet so these win the cascade; .dark .crust-region outranks the
    library's prefers-color-scheme block. This is the documented theming
-   path — see /docs/theming/. */
+   path. See /docs/theming/. */
 /* .crust-region {
   --crust-surface: oklch(0.98 0.005 75);
   --crust-ink: oklch(0.28 0.012 75);

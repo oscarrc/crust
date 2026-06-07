@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { frontmatter } = Astro.props;
-// BASE_URL has no trailing slash by default — normalize so `${base}docs/` works.
+// BASE_URL has no trailing slash by default. Normalize so `${base}docs/` works.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
 const sidebar = [
@@ -21,7 +21,7 @@ const sidebar = [
 const current = Astro.url.pathname.replace(/\/?$/, "/");
 ---
 
-<Layout title={`${frontmatter.title} — Crust docs`}>
+<Layout title={`${frontmatter.title} - Crust docs`}>
   <main
     class="mx-auto grid w-full max-w-[960px] flex-1 grid-cols-1 gap-4 px-[clamp(16px,5vw,64px)] pt-8 md:grid-cols-[180px_1fr] md:gap-16"
   >

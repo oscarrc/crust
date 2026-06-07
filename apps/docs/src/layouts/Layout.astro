@@ -11,8 +11,8 @@ interface Props {
   title?: string;
 }
 
-const { title = "Crust — toasts for Astro & React" } = Astro.props;
-// BASE_URL has no trailing slash by default — normalize so `${base}docs/` works.
+const { title = "Crust - toasts for Astro & React" } = Astro.props;
+// BASE_URL has no trailing slash by default. Normalize so `${base}docs/` works.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
@@ -33,7 +33,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     <script is:inline>
       // Theme before first paint: localStorage wins, OS preference is the
       // default. ClientRouter swaps <html> attributes, so re-apply after
-      // every swap. Registered once — inline head scripts run on full
+      // every swap. Registered once; inline head scripts run on full
       // loads only.
       (() => {
         const apply = () => {
@@ -46,7 +46,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         };
         apply();
         document.addEventListener("astro:after-swap", apply);
-        // The toggle lives in the header, which is replaced on every swap —
+        // The toggle lives in the header, which is replaced on every swap.
         // delegate from document so one listener survives all navigations.
         document.addEventListener("click", (event) => {
           if (!event.target.closest("[data-theme-toggle]")) return;
@@ -99,7 +99,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           class="relative -my-1 cursor-pointer self-center rounded-[10px] border border-line bg-paper-raised p-1.5 text-ink-soft transition-colors hover:border-crumb hover:text-crumb"
           aria-label="Toggle color theme"
         >
-          <!-- Sun in the light, moon in the dark — stroke-drawn, brand style. -->
+          <!-- Sun in the light, moon in the dark. Stroke-drawn, brand style. -->
           <svg
             class="block dark:hidden"
             viewBox="0 0 24 24"
