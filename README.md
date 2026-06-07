@@ -46,10 +46,10 @@ import { toast } from '@oscarrc/crust/vanilla';
 
 toast.success('Fresh bread out of the oven!');
 
-// A title makes a toast expandable — it morphs open on hover/focus/tap,
+// A message makes a toast expandable — it morphs open on hover/focus/tap,
 // or on its own with `expandAfter`:
-toast('Your order shipped today.', {
-  title: 'Order update',
+toast('Order update', {
+  message: 'Your order shipped today.',
   expandAfter: 2000 // auto-expands 2s after becoming visible
 });
 
@@ -88,7 +88,7 @@ import '@oscarrc/crust/styles.css';
 <script>
   import { toast } from '@oscarrc/crust/vanilla';
   document.getElementById('alert')?.addEventListener('click', () => {
-    toast.success('Fresh bread out of the oven!', { title: 'Bakery live' });
+    toast.success('Bakery live', { message: 'Fresh bread out of the oven!' });
   });
 </script>
 ```
@@ -133,18 +133,18 @@ export function Dashboard() {
 ## API at a glance
 
 ```ts
-toast('message', { title, type, duration, icon });
+toast('title', { message, type, duration, icon });
 toast.success('…'); toast.error('…'); toast.info('…'); toast.warning('…');
 
 const id = toast.loading('Uploading…');          // persistent spinner
-toast.update(id, { message: 'Done', type: 'success', duration: 4000 });
+toast.update(id, { title: 'Done', type: 'success', duration: 4000 });
 
 toast.promise(save(), {                           // loading → success/error
   loading: 'Saving…',
   success: (v) => `Saved ${v.name}`,
   error: 'Save failed'
 });
-toast('Read me', { title: 'Hi', expandAfter: 2000 }); // opens itself after 2s
+toast('Hi', { message: 'Read me', expandAfter: 2000 }); // opens itself after 2s
 // toast.promise(…, { expandOnSettle: true }) opens the outcome
 
 toast.dismiss(id);  // one
@@ -154,7 +154,7 @@ mountToaster({ position: 'bottom-right', maxVisible: 5, icons: { … } });
 ```
 
 - `duration` defaults to **4000ms**; `Infinity` (or `0`) means persistent.
-- A toast with a `title` morphs open on hover/focus/tap to reveal its message; the timer pauses while you read.
+- A toast with a `message` morphs open on hover/focus/tap to reveal it; the timer pauses while you read.
 - Icons accept an SVG string, an `Element`, or a factory — [`lucide`](https://lucide.dev) and `lucide-static` work out of the box (`lucide-react` doesn't; the renderer isn't React).
 - Theme everything via `--crust-*` custom properties — see the [theming docs](https://crust.oscarrc.me/docs/theming/).
 

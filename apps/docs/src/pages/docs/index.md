@@ -55,7 +55,7 @@ import '@oscarrc/crust/styles.css';
   // bound to specific elements die when the <body> is swapped.
   document.addEventListener('click', (event) => {
     if (!(event.target as HTMLElement).closest('[data-save]')) return;
-    toast.success('Fresh bread out of the oven.', { title: 'Saved' });
+    toast.success('Saved', { message: 'Fresh bread out of the oven.' });
   });
 </script>
 ```
@@ -133,11 +133,11 @@ for free.
 import { toast } from '@oscarrc/crust/vanilla';
 
 toast('Plain and simple.');
-toast.success('It worked.', { title: 'Saved' });
-toast.error('It did not.', { title: 'Burnt', duration: 8000 });
+toast.success('Saved', { message: 'It worked.' });
+toast.error('Burnt', { message: 'It did not.', duration: 8000 });
 ```
 
-Give a toast a `title` and it gains Crust's signature move: the compact
+Give a toast a `message` and it gains Crust's signature move: the compact
 capsule morphs into a card on hover, focus or tap — one continuous surface,
 message revealed. Head to the [API](./api/) for everything else, or the
 [playground](../playground/) to try every option live.

@@ -34,9 +34,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
             type="text"
             value="Fresh bake"
           />
-          <p class={hintClass}>
-            A title unlocks the morph-expand. Clear it for a plain capsule.
-          </p>
+          <p class={hintClass}>Always visible in the capsule.</p>
         </div>
 
         <div>
@@ -44,6 +42,9 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
           <textarea class={inputClass} id="pg-message" name="message" rows="4"
             >Golden brown and ready to serve.</textarea
           >
+          <p class={hintClass}>
+            A message unlocks the morph-expand. Clear it for a plain capsule.
+          </p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -100,7 +101,7 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
               step="250"
               placeholder="off"
             />
-            <p class={hintClass}>Needs a title.</p>
+            <p class={hintClass}>Needs a message.</p>
           </div>
         </div>
 
@@ -226,8 +227,9 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
     if (!el) return;
     const data = new FormData(el);
     settings.type = (data.get("type") as ToastType) ?? DEFAULTS.type;
-    settings.title = (data.get("title") as string) ?? "";
-    settings.message = (data.get("message") as string) || DEFAULTS.message;
+    // The title is mandatory — an emptied field falls back to the default.
+    settings.title = (data.get("title") as string) || DEFAULTS.title;
+    settings.message = (data.get("message") as string) ?? "";
     settings.duration = Number(data.get("duration") ?? DEFAULTS.duration);
     const after = data.get("expandAfter") as string;
     settings.expandAfter =
@@ -281,7 +283,8 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
     }
 
     const opts: string[] = [];
-    if (settings.title) opts.push(`title: ${JSON.stringify(settings.title)}`);
+    if (settings.message)
+      opts.push(`message: ${JSON.stringify(settings.message)}`);
     if (settings.duration !== DEFAULTS.duration)
       opts.push(`duration: ${settings.duration}`);
     if (settings.expandAfter !== undefined)
@@ -293,11 +296,11 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
 
     // Always the shorthand — it reads like the docs and carries the type.
     const call = `toast.${settings.type}`;
-    const message = JSON.stringify(settings.message);
+    const title = JSON.stringify(settings.title);
     const body =
       opts.length === 0
-        ? `${call}(${message});`
-        : `${call}(${message}, {\n  ${opts.join(",\n  ")}\n});`;
+        ? `${call}(${title});`
+        : `${call}(${title}, {\n  ${opts.join(",\n  ")}\n});`;
 
     lines.push("", body);
     return lines.join("\n");
@@ -323,9 +326,9 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
   };
 
   const bake = () => {
-    toast(settings.message, {
+    toast(settings.title, {
       type: settings.type,
-      title: settings.title || undefined,
+      message: settings.message || undefined,
       duration: settings.duration,
       expandAfter: settings.expandAfter,
       expanded: settings.expanded || undefined,
@@ -363,13 +366,13 @@ const hintClass = "mt-1.5 text-xs text-ink-soft";
       navigator.clipboard
         .writeText(snippet())
         .then(() =>
-          toast.success("The recipe is on your clipboard.", {
-            title: "Copied",
+          toast.success("Copied", {
+            message: "The recipe is on your clipboard.",
           }),
         )
         .catch(() =>
-          toast.error("Clipboard said no — copy it by hand.", {
-            title: "No luck",
+          toast.error("No luck", {
+            message: "Clipboard said no — copy it by hand.",
           }),
         );
     }

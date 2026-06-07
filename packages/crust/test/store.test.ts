@@ -15,7 +15,7 @@ describe('toast()', () => {
   test('adds a toast with info type and 4000ms duration by default', () => {
     toast('hello');
     const [t] = toastStore.getSnapshot();
-    expect(t).toMatchObject({ message: 'hello', type: 'info', duration: 4000 });
+    expect(t).toMatchObject({ title: 'hello', type: 'info', duration: 4000 });
     expect(t!.id).toBeTruthy();
   });
 
@@ -51,9 +51,9 @@ describe('toast()', () => {
     expect(t!.duration).toBe(Infinity);
   });
 
-  test('carries title and icon through', () => {
-    toast('msg', { title: 'Title', icon: '<svg></svg>' });
-    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Title', icon: '<svg></svg>' });
+  test('carries message and icon through', () => {
+    toast('Title', { message: 'body copy', icon: '<svg></svg>' });
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'body copy', icon: '<svg></svg>' });
   });
 });
 
@@ -87,7 +87,7 @@ describe('toast.dismiss', () => {
     toast.dismiss(a);
     const snapshot = toastStore.getSnapshot();
     expect(snapshot).toHaveLength(1);
-    expect(snapshot[0]!.message).toBe('b');
+    expect(snapshot[0]!.title).toBe('b');
   });
 
   test('dismiss() clears everything, including the queue', () => {
@@ -108,8 +108,8 @@ describe('queue (maxVisible)', () => {
   test('promotes queued toasts in order when a slot frees up', () => {
     const ids = Array.from({ length: 6 }, (_, i) => toast(`t${i}`, { duration: Infinity }));
     toast.dismiss(ids[0]!);
-    const messages = toastStore.getSnapshot().map((t) => t.message);
-    expect(messages).toEqual(['t1', 't2', 't3', 't4', 't5']);
+    const titles = toastStore.getSnapshot().map((t) => t.title);
+    expect(titles).toEqual(['t1', 't2', 't3', 't4', 't5']);
   });
 
   test('queued toast timers start on promotion, not on add', () => {
@@ -118,11 +118,11 @@ describe('queue (maxVisible)', () => {
     // Sits in the queue well past its duration — must not expire unseen.
     vi.advanceTimersByTime(5000);
     toast.dismiss(ids[0]!);
-    expect(toastStore.getSnapshot().map((t) => t.message)).toContain('queued');
+    expect(toastStore.getSnapshot().map((t) => t.title)).toContain('queued');
     vi.advanceTimersByTime(999);
-    expect(toastStore.getSnapshot().map((t) => t.message)).toContain('queued');
+    expect(toastStore.getSnapshot().map((t) => t.title)).toContain('queued');
     vi.advanceTimersByTime(1);
-    expect(toastStore.getSnapshot().map((t) => t.message)).not.toContain('queued');
+    expect(toastStore.getSnapshot().map((t) => t.title)).not.toContain('queued');
   });
 
   test('dismiss(id) removes a toast that is still queued', () => {
@@ -130,7 +130,7 @@ describe('queue (maxVisible)', () => {
     const queued = toast('queued', { duration: Infinity });
     toast.dismiss(queued);
     toast.dismiss(toastStore.getSnapshot()[0]!.id);
-    expect(toastStore.getSnapshot().map((t) => t.message)).not.toContain('queued');
+    expect(toastStore.getSnapshot().map((t) => t.title)).not.toContain('queued');
   });
 });
 
@@ -226,11 +226,11 @@ describe('toast.promise', () => {
       error: 'Burnt'
     });
     const [t] = toastStore.getSnapshot();
-    expect(t).toMatchObject({ message: 'Baking…', type: 'loading', duration: Infinity });
+    expect(t).toMatchObject({ title: 'Baking…', type: 'loading', duration: Infinity });
     settle();
   });
 
-  test('morphs into success with a function message and auto-dismisses', async () => {
+  test('morphs into success with a function title and auto-dismisses', async () => {
     const id = toast.promise(Promise.resolve(3), {
       loading: 'Counting…',
       success: (n) => `Counted ${n}`,
@@ -238,7 +238,7 @@ describe('toast.promise', () => {
     });
     await vi.advanceTimersByTimeAsync(0);
     const [t] = toastStore.getSnapshot();
-    expect(t).toMatchObject({ id, message: 'Counted 3', type: 'success', duration: 4000 });
+    expect(t).toMatchObject({ id, title: 'Counted 3', type: 'success', duration: 4000 });
     await vi.advanceTimersByTimeAsync(4000);
     expect(toastStore.getSnapshot()).toHaveLength(0);
   });
@@ -250,25 +250,37 @@ describe('toast.promise', () => {
       error: (e) => `Failed: ${(e as Error).message}`
     });
     await vi.advanceTimersByTimeAsync(0);
-    expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'Failed: boom', type: 'error' });
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Failed: boom', type: 'error' });
   });
 
-  test('accepts object messages with titles', async () => {
+  test('accepts object content with messages', async () => {
     toast.promise(Promise.resolve(), {
-      loading: { message: 'Working…', title: 'Hold on' },
-      success: { message: 'All good', title: 'Done' },
+      loading: { title: 'Hold on', message: 'Working…' },
+      success: { title: 'Done', message: 'All good' },
       error: 'Failed'
     });
-    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Hold on' });
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Hold on', message: 'Working…' });
     await vi.advanceTimersByTimeAsync(0);
-    expect(toastStore.getSnapshot()[0]).toMatchObject({ message: 'All good', title: 'Done', type: 'success' });
+    expect(toastStore.getSnapshot()[0]).toMatchObject({ title: 'Done', message: 'All good', type: 'success' });
+  });
+
+  test('a string outcome clears the loading state message', async () => {
+    toast.promise(Promise.resolve(), {
+      loading: { title: 'Hold on', message: 'Working…' },
+      success: 'Done',
+      error: 'Failed'
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    const [t] = toastStore.getSnapshot();
+    expect(t).toMatchObject({ title: 'Done', type: 'success' });
+    expect(t!.message).toBeUndefined();
   });
 
   test('expandOnSettle expands the success outcome', async () => {
     toast.promise(
       Promise.resolve('ok'),
-      { loading: 'w…', success: 'done', error: 'failed' },
-      { expandOnSettle: true, title: 'Job' }
+      { loading: 'w…', success: { title: 'done', message: 'details' }, error: 'failed' },
+      { expandOnSettle: true }
     );
     expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
     await vi.advanceTimersByTimeAsync(0);
@@ -278,7 +290,7 @@ describe('toast.promise', () => {
   test('expandOnSettle expands the error outcome', async () => {
     toast.promise(
       Promise.reject(new Error('boom')),
-      { loading: 'w…', success: 'done', error: { message: 'failed', title: 'Bad' } },
+      { loading: 'w…', success: 'done', error: { title: 'Bad', message: 'failed' } },
       { expandOnSettle: true }
     );
     await vi.advanceTimersByTimeAsync(0);
@@ -288,12 +300,12 @@ describe('toast.promise', () => {
 
 describe('expanded primitive', () => {
   test('toast can arrive expanded', () => {
-    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    toast('Open', { message: 'details', expanded: true, duration: Infinity });
     expect(toastStore.getSnapshot()[0]!.expanded).toBe(true);
   });
 
   test('update(id, { expanded: true }) restarts the dismiss timer', () => {
-    const id = toast('m', { title: 't', duration: 4000 });
+    const id = toast('t', { message: 'm', duration: 4000 });
     vi.advanceTimersByTime(3900);
     toast.update(id, { expanded: true });
     vi.advanceTimersByTime(3999);
@@ -303,7 +315,7 @@ describe('expanded primitive', () => {
   });
 
   test('timer restart while paused keeps the toast paused with the fresh duration', () => {
-    const id = toast('m', { title: 't', duration: 4000 });
+    const id = toast('t', { message: 'm', duration: 4000 });
     vi.advanceTimersByTime(3000);
     toastStore.pause(id); // hover
     toast.update(id, { expanded: true });
@@ -317,7 +329,7 @@ describe('expanded primitive', () => {
   });
 
   test('update(id, { expanded: false }) does not restart the dismiss timer', () => {
-    const id = toast('m', { title: 't', duration: 4000 });
+    const id = toast('t', { message: 'm', duration: 4000 });
     vi.advanceTimersByTime(3900);
     toast.update(id, { expanded: false });
     vi.advanceTimersByTime(100);
@@ -330,7 +342,7 @@ describe('expanded primitive', () => {
   });
 
   test('expandAfter auto-expands after N ms and restarts the dismiss timer', () => {
-    const id = toast('m', { title: 't', duration: 4000, expandAfter: 2000 });
+    const id = toast('t', { message: 'm', duration: 4000, expandAfter: 2000 });
     vi.advanceTimersByTime(1999);
     expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
     vi.advanceTimersByTime(1);
@@ -343,7 +355,7 @@ describe('expanded primitive', () => {
   });
 
   test('expandAfter is cancelled by dismissal', () => {
-    const id = toast('m', { title: 't', duration: Infinity, expandAfter: 1000 });
+    const id = toast('t', { message: 'm', duration: Infinity, expandAfter: 1000 });
     toast.dismiss(id);
     const listener = vi.fn();
     const unsubscribe = toastStore.subscribe(listener);
@@ -354,7 +366,7 @@ describe('expanded primitive', () => {
 
   test('expandAfter starts when a queued toast is promoted, not when added', () => {
     const pinned = Array.from({ length: 5 }, (_, i) => toast(`p${i}`, { duration: Infinity }));
-    const queued = toast('m', { title: 't', duration: Infinity, expandAfter: 1000 });
+    const queued = toast('t', { message: 'm', duration: Infinity, expandAfter: 1000 });
     vi.advanceTimersByTime(10_000); // sits in queue well past expandAfter
     toast.dismiss(pinned[0]!);
     expect(toastStore.getSnapshot().find((t) => t.id === queued)!.expanded).not.toBe(true);
@@ -362,14 +374,14 @@ describe('expanded primitive', () => {
     expect(toastStore.getSnapshot().find((t) => t.id === queued)!.expanded).toBe(true);
   });
 
-  test('expandAfter without a title is ignored', () => {
-    toast('no title here', { duration: Infinity, expandAfter: 500 });
+  test('expandAfter without a message is ignored', () => {
+    toast('no message here', { duration: Infinity, expandAfter: 500 });
     vi.advanceTimersByTime(5000);
     expect(toastStore.getSnapshot()[0]!.expanded).not.toBe(true);
   });
 
   test('expandAfter firing while hovered pins open but keeps the timer paused', () => {
-    const id = toast('m', { title: 't', duration: 4000, expandAfter: 1000 });
+    const id = toast('t', { message: 'm', duration: 4000, expandAfter: 1000 });
     toastStore.pause(id); // hover before the expand fires
     vi.advanceTimersByTime(1000); // expandAfter fires during hover
     expect(toastStore.getSnapshot()[0]).toMatchObject({ id, expanded: true });

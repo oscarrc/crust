@@ -93,28 +93,28 @@ describe('toast rendering', () => {
   });
 
   test('renders type class, title and message', () => {
-    toast.success('It worked', { title: 'Saved' });
+    toast.success('Saved', { message: 'It worked' });
     const el = document.querySelector('.crust-toast')!;
     expect(el.classList.contains('crust-success')).toBe(true);
     expect(el.querySelector('.crust-title')!.textContent).toBe('Saved');
     expect(el.querySelector('.crust-msg')!.textContent).toBe('It worked');
   });
 
-  test('toast with title and message is expandable', () => {
-    toast('details here', { title: 'Heads up' });
+  test('toast with a message is expandable', () => {
+    toast('Heads up', { message: 'details here' });
     expect(document.querySelector('.crust-toast')!.classList.contains('crust-expandable')).toBe(true);
   });
 
-  test('toast without a title shows message in the capsule and is not expandable', () => {
-    toast('just a message');
+  test('toast without a message is a plain capsule and is not expandable', () => {
+    toast('just a title');
     const el = document.querySelector('.crust-toast')!;
     expect(el.classList.contains('crust-expandable')).toBe(false);
-    expect(el.querySelector('.crust-title')!.textContent).toBe('just a message');
+    expect(el.querySelector('.crust-title')!.textContent).toBe('just a title');
     expect(el.querySelector('.crust-msg')).toBeNull();
   });
 
   test('hover expands and unhover collapses', () => {
-    toast('details', { title: 'Expand me' });
+    toast('Expand me', { message: 'details' });
     const el = document.querySelector('.crust-toast')!;
     el.dispatchEvent(new Event('mouseenter'));
     expect(el.classList.contains('crust-expanded')).toBe(true);
@@ -151,7 +151,7 @@ describe('in-place updates', () => {
   });
 
   test('toast.update re-renders content inside the same cell', () => {
-    const id = toast.loading('Working…', { title: 'Hold on' });
+    const id = toast.loading('Hold on', { message: 'Working…' });
     const cellBefore = document.querySelector('.crust-cell');
     toast.update(id, { message: 'Done!', type: 'success' });
     const cellAfter = document.querySelector('.crust-cell');
@@ -163,8 +163,14 @@ describe('in-place updates', () => {
     expect(toastEls()).toHaveLength(1);
   });
 
+  test('toast.update patches the capsule title', () => {
+    const id = toast('Before', { duration: Infinity });
+    toast.update(id, { title: 'After' });
+    expect(document.querySelector('.crust-title')!.textContent).toBe('After');
+  });
+
   test('expanded state survives an update', () => {
-    const id = toast('details', { title: 'Open me', duration: Infinity });
+    const id = toast('Open me', { message: 'details', duration: Infinity });
     const el = document.querySelector('.crust-toast')!;
     el.dispatchEvent(new Event('mouseenter'));
     expect(el.classList.contains('crust-expanded')).toBe(true);
@@ -181,14 +187,14 @@ describe('store-driven expansion', () => {
   });
 
   test('toast arriving expanded renders open and pinned', () => {
-    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    toast('Open', { message: 'details', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     expect(el.classList.contains('crust-expanded')).toBe(true);
     expect(el.dataset.pinned).toBeTruthy();
   });
 
   test('hover-out does not collapse a store-expanded toast, click does', () => {
-    toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    toast('Open', { message: 'details', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     el.dispatchEvent(new Event('mouseenter'));
     el.dispatchEvent(new Event('mouseleave'));
@@ -198,7 +204,7 @@ describe('store-driven expansion', () => {
   });
 
   test('toast.update({ expanded: true }) opens a visible toast', () => {
-    const id = toast('details', { title: 'Later', duration: Infinity });
+    const id = toast('Later', { message: 'details', duration: Infinity });
     expect(document.querySelector('.crust-expanded')).toBeNull();
     toast.update(id, { expanded: true });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
@@ -207,7 +213,7 @@ describe('store-driven expansion', () => {
   });
 
   test('expansion-only updates act on the live element, exactly like hover', () => {
-    const id = toast('details', { title: 'Later', duration: Infinity });
+    const id = toast('Later', { message: 'details', duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     toast.update(id, { expanded: true });
     // No content changed: the element must NOT be rebuilt/replaced.
@@ -216,7 +222,7 @@ describe('store-driven expansion', () => {
   });
 
   test('a user-collapsed toast stays collapsed through unrelated updates', () => {
-    const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const id = toast('Open', { message: 'details', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     el.click(); // user collapses the store-expanded toast
     expect(el.classList.contains('crust-expanded')).toBe(false);
@@ -233,7 +239,7 @@ describe('exit while expanded', () => {
   });
 
   test('exits in one continuous reverse motion — morph closes and exit run together', () => {
-    const id = toast('details', { title: 'Open', expanded: true, duration: Infinity });
+    const id = toast('Open', { message: 'details', expanded: true, duration: Infinity });
     const el = document.querySelector<HTMLElement>('.crust-toast')!;
     toast.dismiss(id);
     // One gesture: expansion reverses and the exit starts in the same frame.

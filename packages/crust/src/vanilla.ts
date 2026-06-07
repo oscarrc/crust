@@ -8,21 +8,22 @@ export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'loading';
 export type CrustIcon = string | Element | (() => Element);
 
 export interface ToastOptions {
-  title?: string;
+  /** Body copy hidden in the expandable panel. A toast expands iff it has one. */
+  message?: string;
   type?: ToastType;
   /** ms before auto-dismiss. Default 4000. `Infinity` (or `0` as alias) never dismisses. */
   duration?: number;
   icon?: CrustIcon | null;
   /** Arrive with the message panel open (pinned). */
   expanded?: boolean;
-  /** ms after becoming visible until the toast auto-expands. Needs a `title`. */
+  /** ms after becoming visible until the toast auto-expands. Needs a `message`. */
   expandAfter?: number;
 }
 
 export interface Toast {
   id: string;
-  message: string;
-  title?: string;
+  title: string;
+  message?: string;
   type: ToastType;
   duration: number;
   icon?: CrustIcon | null;
@@ -91,7 +92,7 @@ const clearExpandTimer = (id: string) => {
 // invoked at runtime, after module evaluation is complete.
 const scheduleExpand = (toast: Toast) => {
   // Only meaningful when there is a hidden message panel to reveal.
-  if (!toast.title || toast.expandAfter === undefined) return;
+  if (!toast.message || toast.expandAfter === undefined) return;
   if (!Number.isFinite(toast.expandAfter)) return;
   clearExpandTimer(toast.id); // never leak a prior timer for this id
   state.expandTimers.set(
@@ -115,13 +116,13 @@ const promote = () => {
 const normalizeDuration = (raw: number | undefined): number =>
   raw === undefined ? 4000 : raw === 0 ? Infinity : raw;
 
-const add = (message: string, options?: ToastOptions): string => {
+const add = (title: string, options?: ToastOptions): string => {
   const id = `crust-${++state.seq}`;
   const duration = normalizeDuration(options?.duration);
   const next: Toast = {
     id,
-    message,
-    title: options?.title,
+    title,
+    message: options?.message,
     type: options?.type ?? 'info',
     duration,
     icon: options?.icon,
@@ -241,7 +242,7 @@ export const toastStore = {
   configure
 };
 
-type ToastContent = string | { message: string; title?: string };
+type ToastContent = string | { title: string; message?: string };
 
 export interface PromiseMessages<T> {
   loading: ToastContent;
@@ -249,31 +250,31 @@ export interface PromiseMessages<T> {
   error: ToastContent | ((reason: unknown) => ToastContent);
 }
 
-const asPatch = (content: ToastContent): { message: string; title?: string } =>
-  typeof content === 'string' ? { message: content } : content;
+const asPatch = (content: ToastContent): { title: string; message?: string } =>
+  typeof content === 'string' ? { title: content } : content;
 
 const settle = <V>(
   content: ToastContent | ((value: V) => ToastContent),
   value: V
 ): ToastContent => (typeof content === 'function' ? content(value) : content);
 
-type Shorthand = (message: string, options?: Omit<ToastOptions, 'type'>) => string;
+type Shorthand = (title: string, options?: Omit<ToastOptions, 'type'>) => string;
 
 const shorthand =
   (type: ToastType): Shorthand =>
-  (message, options) =>
-    add(message, { ...options, type });
+  (title, options) =>
+    add(title, { ...options, type });
 
 export const toast = Object.assign(
-  (message: string, options?: ToastOptions): string => add(message, options),
+  (title: string, options?: ToastOptions): string => add(title, options),
   {
     success: shorthand('success'),
     error: shorthand('error'),
     info: shorthand('info'),
     warning: shorthand('warning'),
     /** Loading toasts persist until updated or dismissed. */
-    loading: (message: string, options?: Omit<ToastOptions, 'type'>) =>
-      add(message, { duration: Infinity, ...options, type: 'loading' }),
+    loading: (title: string, options?: Omit<ToastOptions, 'type'>) =>
+      add(title, { duration: Infinity, ...options, type: 'loading' }),
     /** Patch a live (or queued) toast. A new `duration` restarts its timer. */
     update: (id: string, patch: ToastPatch) => update(id, patch),
     /**
@@ -290,15 +291,15 @@ export const toast = Object.assign(
       }
     ): string => {
       const { expandOnSettle, ...baseOptions } = options ?? {};
-      const id = add(asPatch(messages.loading).message, {
+      const id = add(asPatch(messages.loading).title, {
         ...baseOptions,
-        title: asPatch(messages.loading).title ?? baseOptions.title,
+        message: asPatch(messages.loading).message ?? baseOptions.message,
         type: 'loading',
         duration: Infinity
       });
       const conclude = (type: ToastType, content: ToastContent) =>
         update(id, {
-          title: undefined,
+          message: undefined,
           ...asPatch(content),
           type,
           duration: normalizeDuration(baseOptions.duration),
@@ -425,7 +426,7 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
   const cells = new Map<string, CellEntry>();
 
   const buildToastEl = (item: Toast): HTMLElement => {
-    const expandable = Boolean(item.title);
+    const expandable = Boolean(item.message);
 
     const el = document.createElement('div');
     el.className = `crust-toast crust-${item.type}${expandable ? ' crust-expandable' : ''}`;
@@ -444,7 +445,7 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
 
     const title = document.createElement('span');
     title.className = 'crust-title';
-    title.textContent = item.title ?? item.message;
+    title.textContent = item.title;
     capsule.appendChild(title);
 
     const dismiss = document.createElement('button');
@@ -469,7 +470,8 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
       bodyInner.className = 'crust-body-inner';
       const msg = document.createElement('p');
       msg.className = 'crust-msg';
-      msg.textContent = item.message;
+      // `expandable` already guarantees a message; satisfy the narrowing.
+      msg.textContent = item.message ?? null;
       bodyInner.appendChild(msg);
       body.appendChild(bodyInner);
       el.appendChild(body);

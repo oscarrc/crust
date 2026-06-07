@@ -7,18 +7,19 @@ Everything lives behind two imports: `toast` to fire notifications and
 `mountToaster` to render them. The React entry adds `<Toaster />` and
 `useToasts()` over the same store.
 
-## `toast(message, options?)`
+## `toast(title, options?)`
 
-Fires a toast and returns its `id`.
+Fires a toast and returns its `id`. The `title` is the capsule text — always
+visible. A `message` is the body copy hidden behind the morph-expand.
 
 | Option        | Type                              | Default  | Notes                                            |
 | ------------- | --------------------------------- | -------- | ------------------------------------------------ |
-| `title`       | `string`                          | —        | Shown in the capsule; unlocks the morph-expand   |
+| `message`     | `string`                          | —        | Body copy revealed on expand; unlocks the morph-expand |
 | `type`        | `'success' \| 'error' \| 'info' \| 'warning' \| 'loading'` | `'info'` | Picks the icon and its color |
 | `duration`    | `number`                          | `4000`   | ms. `Infinity` (or `0`) never auto-dismisses     |
 | `icon`        | `string \| Element \| () => Element \| null` | per type | Overrides the icon; `null` hides it   |
 | `expanded`    | `boolean`                         | `false`  | Arrive with the message panel already open (pinned) |
-| `expandAfter` | `number`                          | —        | ms after becoming visible until the toast auto-expands (needs `title`); restarts the dismiss timer when it fires |
+| `expandAfter` | `number`                          | —        | ms after becoming visible until the toast auto-expands (needs `message`); restarts the dismiss timer when it fires |
 
 ### Shorthands
 
@@ -37,7 +38,7 @@ inside the same cell, and a new `duration` restarts the timer from now:
 
 ```ts
 const id = toast.loading('Uploading…');
-toast.update(id, { message: 'Uploaded', type: 'success', duration: 4000 });
+toast.update(id, { title: 'Uploaded', type: 'success', duration: 4000 });
 ```
 
 Patching `expanded: true` opens the message panel (pinned) and restarts the
@@ -46,8 +47,9 @@ dismiss timer — it's the primitive under `expandAfter` and `expandOnSettle`.
 ### Promises
 
 Sugar over `loading` + `update`: shows a spinner toast, then morphs it into
-the outcome when the promise settles. `success`/`error` accept a string, a
-`{ message, title }` object, or a function of the value/reason:
+the outcome when the promise settles. `success`/`error` accept a string
+(used as the title), a `{ title, message? }` object, or a function of the
+value/reason:
 
 ```ts
 toast.promise(saveDraft(), {
@@ -60,7 +62,7 @@ toast.promise(saveDraft(), {
 With `expandOnSettle`, the outcome arrives with its message panel already
 open — and the fresh duration gives the reader the full time to read it.
 Note it only has a visible effect when the outcome content carries a
-`title` (title-less toasts show their whole message in the capsule).
+`message` (without one, the toast is just a capsule — nothing to expand).
 
 ### Dismissing
 
@@ -120,9 +122,9 @@ const toasts = useToasts(); // readonly Toast[]
 
 ## Behavior notes
 
-- **Morph-expand** — a toast with a `title` shows it in the compact capsule;
-  hover, focus or tap grows the same surface to reveal the message. The
-  auto-dismiss timer pauses while expanded or hovered.
+- **Morph-expand** — every toast shows its `title` in the compact capsule;
+  give it a `message` and hover, focus or tap grows the same surface to
+  reveal it. The auto-dismiss timer pauses while expanded or hovered.
 - **View transitions** — with Astro's `<ClientRouter />`, Crust re-adopts its
   region after every swap, so live toasts (and their timers) carry straight
   across page navigations.

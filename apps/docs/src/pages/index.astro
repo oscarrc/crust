@@ -24,7 +24,6 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         >
         <a class="btn" href={`${base}docs/`}>Read the docs</a>
       </div>
-
       <div
         class="mt-10 flex max-w-md items-center justify-between gap-4 rounded-[10px] bg-oven py-3.5 pr-2.5 pl-5"
       >
@@ -63,8 +62,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       </h2>
       <p class="m-0 max-w-[60ch] text-sm text-ink-soft">
         Every kind of toast, fired from a plain Astro
-        <code class="font-mono text-[0.85em]">&lt;script&gt;</code> — zero React
-        in this execution path.
+        <code class="font-mono text-[0.85em]">&lt;script&gt;</code> — zero React in
+        this execution path.
       </p>
       <div class="mt-4 mb-8 flex flex-wrap gap-2">
         <button class="btn" data-bake="success">Success</button>
@@ -100,8 +99,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           </h3>
           <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             The renderer is vanilla DOM. A React-free Astro site renders toasts
-            with <code class="font-mono text-[0.85em]">mountToaster()</code> —
-            React is an optional peer, not a requirement.
+            with <code class="font-mono text-[0.85em]">mountToaster()</code> — React
+            is an optional peer, not a requirement.
           </p>
         </li>
         <li>
@@ -109,7 +108,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
             One surface, growing
           </h3>
           <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
-            Hover a toast with a title and the capsule morphs into a card —
+            Hover a toast with a message and the capsule morphs into a card —
             constant radius, one container, no second panel bolted on.
           </p>
         </li>
@@ -119,8 +118,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           </h3>
           <p class="col-start-2 m-0 text-[0.95rem] text-ink-soft">
             Entrances land in 320ms, exits in 200, and interaction is never
-            blocked. Timers pause while you read. Reduced motion is a theme,
-            not an afterthought.
+            blocked. Timers pause while you read. Reduced motion is a theme, not
+            an afterthought.
           </p>
         </li>
         <li>
@@ -168,19 +167,19 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
   const bakes: Record<string, () => void> = {
     success: () =>
-      toast.success("Fresh bread out of the oven.", { title: "Bakery live" }),
+      toast.success("Bakery live", { message: "Fresh bread out of the oven." }),
     error: () =>
-      toast.error("The loaf did not survive.", { title: "Burnt toast" }),
+      toast.error("Burnt toast", { message: "The loaf did not survive." }),
     info: () =>
-      toast.info(
-        "Hover or focus any toast with a title and the capsule grows into a card. Click to pin it open.",
-        { title: "Proofing tip" },
-      ),
+      toast.info("Proofing tip", {
+        message:
+          "Hover or focus any toast with a message and the capsule grows into a card. Click to pin it open.",
+      }),
     warning: () =>
-      toast.warning("The oven is running hot.", { title: "Mind the heat" }),
+      toast.warning("Mind the heat", { message: "The oven is running hot." }),
     loading: () => {
       // Loading toasts persist until updated — prove toast.update too.
-      const id = toast.loading("Proofing the dough…", { title: "Patience" });
+      const id = toast.loading("Patience", { message: "Proofing the dough…" });
       setTimeout(
         () =>
           toast.update(id, {
@@ -204,28 +203,29 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
           ),
         ),
         {
-          loading: { message: "In the oven…", title: "Baking" },
+          loading: { title: "Baking", message: "In the oven…" },
           success: (loaf) => ({
-            message: `One ${loaf}, golden brown.`,
             title: "Fresh bake",
+            message: `One ${loaf}, golden brown.`,
           }),
           error: (e) => ({
-            message: `No loaf today — ${(e as Error).message}.`,
             title: "Bake failed",
+            message: `No loaf today — ${(e as Error).message}.`,
           }),
         },
         { expandOnSettle: true },
       ),
-    // No title means no expansion — the toast stays a plain capsule.
-    plain: () => toast("A bare capsule — no title, nothing to expand into."),
+    // Without a message the title rides the capsule alone —
+    // nothing left hidden, so there's nothing to expand into.
+    plain: () => toast("A bare capsule — no message, no expansion."),
     "custom-icon": () =>
-      toast.success("Any lucide icon, or your own SVG.", {
-        title: "Croissant mode",
+      toast.success("Croissant mode", {
+        message: "Any lucide icon, or your own SVG.",
         icon: () => createElement(Croissant),
       }),
     persistent: () =>
-      toast("This one stays until you dismiss it.", {
-        title: "No timer",
+      toast("No timer", {
+        message: "This one stays until you dismiss it.",
         duration: 0,
       }),
   };
@@ -244,13 +244,13 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       navigator.clipboard
         .writeText(copy.dataset.copy!)
         .then(() =>
-          toast.success("The recipe is on your clipboard.", {
-            title: "Copied",
+          toast.success("Copied", {
+            message: "The recipe is on your clipboard.",
           }),
         )
         .catch(() =>
-          toast.error("Clipboard said no — copy it by hand.", {
-            title: "No luck",
+          toast.error("No luck", {
+            message: "Clipboard said no — copy it by hand.",
           }),
         );
     }

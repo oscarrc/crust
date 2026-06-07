@@ -19,8 +19,8 @@ export function Playground() {
         <button
           className="btn"
           onClick={() =>
-            toast.success("Triggered from inside a React island.", {
-              title: "Island toast",
+            toast.success("Island toast", {
+              message: "Triggered from inside a React island.",
             })
           }
         >
