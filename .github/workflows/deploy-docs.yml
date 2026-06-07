@@ -1,44 +1,17 @@
-name: Deploy Showcase
+name: Deploy Docs
 
-# Docs import the built library dist, so lib changes also trigger a deploy.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/docs/**'
-      - 'packages/crust/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build:lib
-      - run: pnpm build:docs
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./apps/docs/dist
-      - id: deployment
-        uses: actions/deploy-pages@v4
+  test:
+    uses: ./.github/workflows/test-docs.yml
+  publish:
+    needs: test
+    uses: ./.github/workflows/publish-docs.yml
