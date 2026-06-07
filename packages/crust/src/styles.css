@@ -102,10 +102,32 @@
 .crust-pos-bottom-center .crust-cell-inner,
 .crust-pos-top-center .crust-cell-inner { justify-content: center; }
 
+/* Swipe to dismiss: the pointer drags the cell inner (its overflow clip
+   travels with it; the toast alone would be cut off at the cell edge).
+   Settling is a class so the drag itself stays 1:1. */
+
+.crust-swipe-return {
+  transition:
+    transform var(--crust-dur-out) var(--crust-ease),
+    opacity var(--crust-dur-out) var(--crust-ease);
+}
+
+.crust-swipe-exit {
+  transition:
+    transform var(--crust-dur-out) var(--crust-ease-exit),
+    opacity var(--crust-dur-out) var(--crust-ease-exit);
+}
+
+.crust-toast.crust-swiping {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* Toast: one warm, opaque surface ------------------------------------ */
 
 .crust-toast {
   pointer-events: auto;
+  touch-action: pan-y; /* vertical pans scroll; horizontal drags swipe */
   box-sizing: border-box;
   width: fit-content;
   max-width: min(var(--crust-width), calc(100vw - 2 * var(--crust-offset)));
@@ -314,7 +336,9 @@
 @media (prefers-reduced-motion: reduce) {
   .crust-cell,
   .crust-toast,
-  .crust-body {
+  .crust-body,
+  .crust-swipe-return,
+  .crust-swipe-exit {
     transition-duration: 1ms;
   }
 

@@ -1,1 +1,0 @@
-- [] Refactor javascript code to not be all in the same file. Split it up by feature and import it into the main file. This will make it easier to maintain and understand the codebase.

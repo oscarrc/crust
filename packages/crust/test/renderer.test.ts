@@ -335,3 +335,103 @@ describe('icons', () => {
     expect(factory).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('swipe to dismiss', () => {
+  beforeEach(() => {
+    toaster = mountToaster();
+  });
+
+  const inner = () => document.querySelector<HTMLElement>('.crust-cell-inner')!;
+
+  const swipeEvent = (type: string, init: PointerEventInit) =>
+    new PointerEvent(type, { bubbles: true, cancelable: true, ...init });
+
+  /** pointerdown at xs[0], moves through the rest, then pointerup/cancel. */
+  const drag = (
+    target: HTMLElement,
+    xs: number[],
+    opts: { pointerType?: string; cancel?: boolean } = {}
+  ) => {
+    const pointerType = opts.pointerType ?? 'touch';
+    target.dispatchEvent(
+      swipeEvent('pointerdown', { pointerId: 1, clientX: xs[0], clientY: 10, pointerType })
+    );
+    for (const x of xs.slice(1)) {
+      target.dispatchEvent(
+        swipeEvent('pointermove', { pointerId: 1, clientX: x, clientY: 10, pointerType })
+      );
+    }
+    target.dispatchEvent(
+      swipeEvent(opts.cancel ? 'pointercancel' : 'pointerup', {
+        pointerId: 1,
+        clientX: xs[xs.length - 1],
+        clientY: 10,
+        pointerType
+      })
+    );
+  };
+
+  test('a drag past the threshold dismisses in the swipe direction', () => {
+    const id = toast('swipe me', { duration: Infinity });
+    drag(inner(), [200, 220, 340]); // dx 140 > 35% of the 360px fallback width
+    expect(toastStore.getSnapshot().some((t) => t.id === id)).toBe(false);
+    expect(inner().classList.contains('crust-swipe-exit')).toBe(true);
+    expect(inner().style.transform).toBe('translateX(408px)');
+  });
+
+  test('swiping left dismisses too, sliding out leftward', () => {
+    const id = toast('swipe me', { duration: Infinity });
+    drag(inner(), [200, 180, 60]);
+    expect(toastStore.getSnapshot().some((t) => t.id === id)).toBe(false);
+    expect(inner().style.transform).toBe('translateX(-408px)');
+  });
+
+  test('a short drag springs back and keeps the toast', () => {
+    const id = toast('stay', { duration: Infinity });
+    const target = inner();
+    drag(target, [200, 220, 240]);
+    expect(toastStore.getSnapshot().some((t) => t.id === id)).toBe(true);
+    expect(target.style.transform).toBe('');
+    expect(target.classList.contains('crust-swipe-return')).toBe(true);
+    vi.advanceTimersByTime(500); // settle fallback clears the transition class
+    expect(target.classList.contains('crust-swipe-return')).toBe(false);
+  });
+
+  test('dragging pauses the dismiss timer; a cancelled touch swipe resumes it', () => {
+    toast('timed', { duration: 1000 });
+    const target = inner();
+    target.dispatchEvent(
+      swipeEvent('pointerdown', { pointerId: 1, clientX: 200, clientY: 10, pointerType: 'touch' })
+    );
+    target.dispatchEvent(
+      swipeEvent('pointermove', { pointerId: 1, clientX: 240, clientY: 10, pointerType: 'touch' })
+    );
+    vi.advanceTimersByTime(5000); // mid-drag: the clock is paused
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    target.dispatchEvent(
+      swipeEvent('pointercancel', { pointerId: 1, clientX: 240, clientY: 10, pointerType: 'touch' })
+    );
+    vi.advanceTimersByTime(5000);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('a cancelled mouse drag leaves the pause to mouseleave, like hover', () => {
+    toast('hover-owned', { duration: 1000 });
+    drag(inner(), [200, 220, 240], { pointerType: 'mouse' });
+    vi.advanceTimersByTime(5000); // still hovering: stays paused
+    expect(toastStore.getSnapshot()).toHaveLength(1);
+    document.querySelector('.crust-toast')!.dispatchEvent(new Event('mouseleave'));
+    vi.advanceTimersByTime(5000);
+    expect(toastStore.getSnapshot()).toHaveLength(0);
+  });
+
+  test('the click after a swipe does not pin-expand; a clean tap still does', () => {
+    toast('expandable', { message: 'details', duration: Infinity });
+    const el = document.querySelector<HTMLElement>('.crust-toast')!;
+    drag(inner(), [200, 220, 240]);
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(el.classList.contains('crust-expanded')).toBe(false);
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(el.classList.contains('crust-expanded')).toBe(true);
+  });
+});

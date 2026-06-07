@@ -44,6 +44,13 @@ const EXIT_FALLBACK_MS = 450;
 const ENTER_MS = 320;
 const STAGGER_MS = 50;
 
+/** Swipe-to-dismiss: a horizontal drag commits past this fraction of the
+    toast's width, or on a flick faster than the velocity (px/ms). Below
+    the intent distance a touch is still a tap or a vertical scroll. */
+const SWIPE_INTENT_PX = 12;
+const SWIPE_DISMISS_RATIO = 0.35;
+const SWIPE_FLICK_VELOCITY = 0.6;
+
 const fromMarkup = (markup: string): Element | null => {
   const template = document.createElement('template');
   template.innerHTML = markup.trim();
@@ -204,6 +211,122 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     return el;
   };
 
+  // Swipe-to-dismiss. The gesture drives the cell INNER, not the toast: the
+  // inner's overflow clip travels with its own transform (a translated toast
+  // would be cut off at the cell edge), it carries no CSS transition to
+  // fight the 1:1 drag, and it survives content rebuilds mid-gesture — the
+  // toast element is replaced inside it, never around it.
+  const wireSwipe = (inner: HTMLElement, id: string) => {
+    let pointerId = -1;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let lastT = 0;
+    let velocity = 0;
+    let dragging = false;
+    let suppressClick = false;
+
+    const toastEl = () => inner.querySelector<HTMLElement>('.crust-toast');
+
+    inner.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      if (inner.classList.contains('crust-swipe-exit')) return;
+      pointerId = event.pointerId;
+      startX = lastX = event.clientX;
+      startY = event.clientY;
+      lastT = event.timeStamp;
+      velocity = 0;
+      suppressClick = false;
+    });
+
+    inner.addEventListener('pointermove', (event) => {
+      if (event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      if (!dragging) {
+        // Horizontal intent only: taps stay clicks, vertical pans keep
+        // scrolling the message (touch-action: pan-y does the native half).
+        const dy = event.clientY - startY;
+        if (Math.abs(dx) < SWIPE_INTENT_PX || Math.abs(dx) <= Math.abs(dy)) {
+          return;
+        }
+        dragging = true;
+        suppressClick = true;
+        inner.classList.remove('crust-swipe-return');
+        inner.setPointerCapture?.(event.pointerId);
+        toastEl()?.classList.add('crust-swiping');
+        toastStore.pause(id);
+      }
+      // Real pointermoves arrive a frame apart; sub-frame samples would
+      // make the velocity meaninglessly large.
+      const dt = event.timeStamp - lastT;
+      if (dt > 4) {
+        velocity = (event.clientX - lastX) / dt;
+        lastX = event.clientX;
+        lastT = event.timeStamp;
+      }
+      inner.style.transform = `translateX(${dx}px)`;
+      inner.style.opacity = String(
+        Math.max(0.25, 1 - Math.abs(dx) / (inner.offsetWidth || 360))
+      );
+    });
+
+    const release = (event: PointerEvent) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = -1;
+      if (!dragging) return;
+      dragging = false;
+      toastEl()?.classList.remove('crust-swiping');
+
+      const dx = event.clientX - startX;
+      const width = inner.offsetWidth || 360;
+      const flick =
+        Math.abs(velocity) > SWIPE_FLICK_VELOCITY &&
+        Math.sign(velocity) === Math.sign(dx);
+      const dismiss =
+        event.type === 'pointerup' &&
+        (Math.abs(dx) > width * SWIPE_DISMISS_RATIO || flick);
+
+      if (dismiss) {
+        // Slide off in the gesture's direction while the cell collapses —
+        // the exit is the swipe finishing itself, no capsule stopover.
+        inner.classList.add('crust-swipe-exit');
+        inner.style.transform = `translateX(${Math.sign(dx) * (width + 48)}px)`;
+        inner.style.opacity = '0';
+        toastStore.remove(id);
+        return;
+      }
+
+      // Spring back to rest; the transition lives on a class so the next
+      // drag is 1:1 again.
+      inner.classList.add('crust-swipe-return');
+      inner.style.transform = '';
+      inner.style.opacity = '';
+      const settled = () => inner.classList.remove('crust-swipe-return');
+      inner.addEventListener('transitionend', settled, { once: true });
+      setTimeout(settled, EXIT_FALLBACK_MS);
+      // Touch has no hover to hand the pause back to; a mouse is still over
+      // the toast, so mouseleave keeps owning the resume.
+      if (event.pointerType !== 'mouse' && !toastEl()?.dataset.pinned) {
+        toastStore.resume(id);
+      }
+    };
+    inner.addEventListener('pointerup', release);
+    inner.addEventListener('pointercancel', release);
+
+    // A drag that ends over the toast still emits a click; swallow it so a
+    // swipe never doubles as tap-to-pin (or tap-to-dismiss).
+    inner.addEventListener(
+      'click',
+      (event) => {
+        if (!suppressClick) return;
+        suppressClick = false;
+        event.stopPropagation();
+        event.preventDefault();
+      },
+      true
+    );
+  };
+
   const buildCell = (item: Toast): CellEntry => {
     const cell = document.createElement('div');
     cell.className = 'crust-cell';
@@ -212,6 +335,7 @@ export const mountToaster = (options: ToasterOptions = {}): ToasterHandle => {
     const el = buildToastEl(item);
     inner.appendChild(el);
     cell.appendChild(inner);
+    wireSwipe(inner, item.id);
     return { cell, inner, el, item };
   };
 

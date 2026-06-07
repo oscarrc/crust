@@ -74,6 +74,10 @@ toast.dismiss(id); // one toast
 toast.dismiss();   // everything, including the queue
 ```
 
+A horizontal swipe dismisses too — either direction, on touch or with a
+mouse drag. Past a third of the toast's width (or on a quick flick) it
+slides off; released earlier it springs back and the timer resumes.
+
 ## `mountToaster(options?)`
 
 Mounts the renderer. In the vanilla path, `<Toaster />` does this for you in
@@ -127,6 +131,9 @@ const toasts = useToasts(); // readonly Toast[]
 - **Morph-expand**: every toast shows its `title` in the compact capsule;
   give it a `message` and hover, focus or tap grows the same surface to
   reveal it. The auto-dismiss timer pauses while expanded or hovered.
+- **Swipe to dismiss**: drag a toast sideways and let go — it slides off in
+  the direction of the gesture. The timer pauses while you hold it, and an
+  uncommitted swipe hands the toast right back.
 - **View transitions**: with Astro's `<ClientRouter />`, Crust re-adopts its
   region after every swap, so live toasts (and their timers) carry straight
   across page navigations.
