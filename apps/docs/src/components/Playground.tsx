@@ -26,16 +26,8 @@ export function Playground() {
         >
           Toast from React
         </button>
-        <button
-          className="btn"
-          onClick={() =>
-            toast.info(
-              "The badge above updates through useToasts() — same store, no context provider.",
-              { title: "Shared store" },
-            )
-          }
-        >
-          Prove the shared store
+        <button className="btn" onClick={() => toast.dismiss()}>
+          Dismiss all
         </button>
       </div>
     </div>
