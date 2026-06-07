@@ -39,11 +39,16 @@ Conventional commits are required — release-please parses them to cut releases
 
 ## Architecture
 
-The whole library is three source files in `packages/crust/src/`:
+The library lives in `packages/crust/src/`, flat (no subfolders until a module grows a second file):
 
-- **`vanilla.ts`** — everything: store, `toast` API, and DOM renderer (`mountToaster`). There is a TODO to split this by feature.
-- **`react.tsx`** — thin bridge only: `useToasts()` (`useSyncExternalStore` over the store) and `<Toaster />` (mounts the vanilla renderer in an effect). It renders nothing itself.
+- **`store.ts`** — the `globalThis` singleton, timers, queue/promotion, and `toastStore`. The **only** file that touches `state`. Also exports `removeAll`/`normalizeDuration` as *package-internal* helpers for `toast.ts` — they are deliberately not part of the published surface.
+- **`toast.ts`** — the `toast` API (shorthands, `update`, `promise`, `dismiss`). A pure client of `toastStore`'s public surface plus the two internal store helpers; owns `PromiseMessages`.
+- **`renderer.ts`** — `mountToaster`, default icons, motion constants; owns the `Toaster*` types. Talks to the store only through `toastStore` methods.
+- **`vanilla.ts`** — the public interface manifest for `@oscarrc/crust/vanilla`: pure re-exports of the documented API and **nothing else**. Internal exports (`removeAll`, `normalizeDuration`, private types) must never be added here "for convenience". tsup flattens everything into one `dist/vanilla.js`, so this structure is invisible to consumers.
+- **`react.tsx`** — thin bridge only: `useToasts()` (`useSyncExternalStore` over the store) and `<Toaster />` (mounts the vanilla renderer in an effect). It renders nothing itself, and imports from `./vanilla` — it consumes the library exactly as documented.
 - **`styles.css`** — all visuals/motion, shipped as a standalone `dist/styles.css` entry (separate tsup config entry so no side-effect import pollutes the JS).
+
+Internal import policy: siblings import siblings directly (`toast.ts → store.ts`, `renderer.ts → store.ts`; the manifest sits above them, never imported internally). Everything outside the trio — `react.tsx` and all tests — imports the `vanilla` manifest. Types live with the module that gives them meaning; there is deliberately no `types.ts` or `utils.ts`.
 
 Key design points that span files:
 
@@ -52,7 +57,7 @@ Key design points that span files:
 - **Interaction state lives in the DOM, not the store**: hover/focus/pin expansion is element classes (`crust-expanded`) and `dataset.pinned`. Store-driven expansion (`expanded: true` via update) is treated as a _command edge_ — only a change to `true` forces the panel open. On content rebuilds (`toast.update`/`toast.promise`), the live element's gesture state is carried over and is authoritative.
 - **Timers pause/resume** on hover/focus (the reader gets time); a new `duration` or a programmatic expansion restarts the clock, but a paused toast stays paused with the fresh duration.
 - **Astro view transitions**: the renderer re-adopts its region after `astro:after-swap` so live toasts survive ClientRouter `<body>` swaps.
-- **Motion constants** `EXIT_FALLBACK_MS` / `ENTER_MS` / `STAGGER_MS` in `vanilla.ts` must stay in sync with the `--crust-dur-*` tokens in `styles.css`.
+- **Motion constants** `EXIT_FALLBACK_MS` / `ENTER_MS` / `STAGGER_MS` in `renderer.ts` must stay in sync with the `--crust-dur-*` tokens in `styles.css`.
 - **Theming** is entirely `--crust-*` custom properties on `.crust-region`; semantic color lives only in icons. Icons are `string | Element | (() => Element)` — Elements are cloned per render.
 
 Deliberate non-goals (don't add these): JSX/React toast content, reactive `<Toaster />` props (options are read once at mount), bounce/spring motion (ease-out-quint, nothing over 320ms).
@@ -60,6 +65,8 @@ Deliberate non-goals (don't add these): JSX/React toast content, reactive `<Toas
 ## Tests
 
 Vitest with `happy-dom`. Tests use fake timers and reset shared state in `beforeEach` (`toast.dismiss()` + `toastStore.configure(...)`) — the global singleton store persists across tests, so any new test file must do the same.
+
+Tests import from `src/vanilla` only — the manifest is the test surface. Never import `src/store`/`src/toast`/`src/renderer` from a test: passing tests must mean the *published* interface works.
 
 ## Docs site
 
