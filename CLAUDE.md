@@ -17,6 +17,8 @@ Run from the repo root:
 pnpm build:lib    # build the package → packages/crust/dist (tsup)
 pnpm build:docs   # build the docs site (astro build)
 pnpm test         # vitest run (store, renderer, react bridge)
+pnpm test:browser # package tests in real Chromium (vitest browser mode)
+pnpm test:e2e     # docs e2e (playwright; needs pnpm build:docs first)
 pnpm check:pkg    # publint + arethetypeswrong (esm-only profile)
 pnpm dev          # tsup --watch + astro dev in parallel
 pnpm dev:docs     # docs site only
@@ -26,12 +28,12 @@ Single test file / watch mode (from `packages/crust/`):
 
 ```bash
 pnpm vitest run test/store.test.ts
-pnpm vitest        # watch mode
+pnpm vitest --project unit   # watch mode (bare `pnpm vitest` also runs the browser project)
 ```
 
 The docs app also has `pnpm check` (astro check + tsc) inside `apps/docs/`.
 
-CI is path-filtered per workspace: `ci.yml` (lib: `build:lib` → `test` → `check:pkg`) runs on `packages/crust` changes; `ci-docs.yml` and `deploy-docs.yml` (`build:lib` → `build:docs`) run on `apps/docs` *or* `packages/crust` changes — docs import the built `dist/`, so lib changes retrigger them. Lockfile/workspace changes trigger everything. `release.yml` is unfiltered: release-please path-scopes by its own config, and the publish job re-runs build+test as the gate before npm.
+CI is built from reusable subworkflows: `test-package.yml` (build → unit → browser → check:pkg) and `test-docs.yml` (build → astro check → e2e) are `workflow_call`-only, consumed by three entry points. `ci.yml` runs on every PR/push and fans out via a paths-filter job (lib changes also trigger docs tests — docs import the built `dist/`). `deploy-package.yml` and `deploy-docs.yml` (manual dispatch or called from release) each run their test subworkflow before their publish subworkflow. `release.yml` chains release-please → deploy-package → deploy-docs, so docs publish only after the npm release; docs-only changes reach the live site via manual dispatch of Deploy Docs.
 
 ## Releases
 
@@ -68,6 +70,22 @@ Vitest with `happy-dom`. Tests use fake timers and reset shared state in `before
 
 Tests import from `src/vanilla` only — the manifest is the test surface. Never import `src/store`/`src/toast`/`src/renderer` from a test: passing tests must mean the *published* interface works.
 
+The vitest config has two projects: `unit` (happy-dom, fake timers, `test/*.test.{ts,tsx}`) and `browser` (real Chromium via vitest browser mode, REAL timers + short durations, `test/browser/*.test.ts`). Browser tests cover what happy-dom can't: real CSS motion, pointer gestures (swipe via a custom `page.mouse` command — synthetic PointerEvents break on `setPointerCapture`), hover/focus timing. Browser test files repeat the same singleton reset (`beforeEach` dismiss/configure/mount, `afterEach` drain + unmount; files that drive the real cursor also park it via `userEvent.unhover(document.body)`) — new files must too. Docs e2e lives in `apps/docs/e2e/` (Playwright against the built site).
+
 ## Docs site
 
 Astro 6 + React islands + Tailwind 4. Internal links use `import.meta.env.BASE_URL` (currently `/` — the site lives at the domain root `crust.oscarrc.me`).
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked on GitHub (`oscarrc/crust`) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical defaults: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
