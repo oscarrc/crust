@@ -1,0 +1,21 @@
+name: Test Docs
+
+# Docs import the built library dist, so the lib builds first here too.
+on: workflow_call
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:lib
+      - run: pnpm --filter docs check
+      - run: pnpm build:docs
+      - run: pnpm --filter docs exec playwright install chromium --with-deps
+      - run: pnpm test:e2e

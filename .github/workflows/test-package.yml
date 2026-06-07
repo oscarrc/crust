@@ -1,0 +1,20 @@
+name: Test Package
+
+on: workflow_call
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:lib
+      - run: pnpm test
+      - run: pnpm --filter @oscarrc/crust exec playwright install chromium --with-deps
+      - run: pnpm test:browser
+      - run: pnpm check:pkg
