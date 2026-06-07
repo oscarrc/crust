@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { Font } from "astro:assets";
+import { getCollection } from "astro:content";
 import { Toaster } from "@oscarrc/crust/react";
 import GitHubIcon from "../assets/github.svg";
 import NpmIcon from "../assets/npm.svg";
@@ -14,6 +15,15 @@ interface Props {
 const { title = "Crust - toasts for Astro & React" } = Astro.props;
 // BASE_URL has no trailing slash by default. Normalize so `${base}docs/` works.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+
+const socials = await getCollection("socials");
+// Resolve each social's `icon` filename to its imported SVG component.
+// `typeof GitHubIcon` is the imported-SVG component type, so the resolved
+// values type-check as renderable components.
+const socialIcons = import.meta.glob<{ default: typeof GitHubIcon }>(
+  "../assets/*.svg",
+  { eager: true },
+);
 ---
 
 <!doctype html>
@@ -136,14 +146,56 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     </header>
     <slot />
     <footer
-      class="mt-24 border-t border-line px-[clamp(16px,5vw,64px)] py-4 text-sm text-ink-soft"
+      class="mt-24 flex flex-col items-center gap-4 border-t border-line px-[clamp(16px,5vw,64px)] py-4 text-center text-sm text-ink-soft sm:flex-row sm:justify-between sm:text-left"
     >
       <p class="m-0">
-        MIT · baked by <a
+        License: <a
           class="text-crumb underline decoration-1 underline-offset-3"
-          href="https://oscarrc.me">Oscar Rey</a
+          href="https://github.com/oscarrc/crust/blob/main/LICENSE"
+          target="_blank"
+          rel="noopener noreferrer">MIT</a
         >
       </p>
+      <p class="m-0 flex items-center gap-1.5">
+        Baked with
+        <svg
+          class="text-crumb"
+          viewBox="0 0 24 24"
+          width="15"
+          height="15"
+          fill="currentColor"
+          aria-label="love"
+          role="img"
+        >
+          <path
+            d="M12 21s-6.716-4.35-9.193-7.78C1.07 10.94 1.45 7.6 3.99 6.13a4.93 4.93 0 0 1 6.01.86L12 9l1.999-2.01a4.93 4.93 0 0 1 6.01-.86c2.54 1.47 2.92 4.81 1.184 7.09C18.716 16.65 12 21 12 21Z"
+          ></path>
+        </svg>
+        <a
+          class="text-crumb underline decoration-1 underline-offset-3"
+          href="https://oscarrc.me">Oscar R.C.</a
+        >
+      </p>
+      <ul class="m-0 flex list-none items-center gap-4 p-0">
+        {
+          socials.map((social) => {
+            const Icon = socialIcons[`../assets/${social.data.icon}`]?.default;
+            return (
+              <li>
+                <a
+                  class="block text-ink-soft transition-colors hover:text-crumb"
+                  href={social.data.url}
+                  aria-label={`Oscar R.C. on ${social.data.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {Icon && <Icon width={17} height={17} fill="currentColor" />}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
     </footer>
     <Toaster client:load transition:persist="crust-toaster" />
   </body>
