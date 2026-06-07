@@ -10,6 +10,7 @@
     "dev:docs": "pnpm --filter docs dev",
     "test": "pnpm --filter @oscarrc/crust test",
     "test:browser": "pnpm --filter @oscarrc/crust test:browser",
+    "test:e2e": "pnpm --filter docs test:e2e",
     "check:pkg": "pnpm --filter @oscarrc/crust check:pkg"
   }
 }

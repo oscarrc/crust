@@ -1,6 +1,14 @@
 node_modules/
 dist/
+
+**/__screenshots__
+**/.vitest-*
+
 .astro/
 *.log
 .DS_Store
-packages/crust/README.md
+docs/**
+test-results/
+playwright-report/
+__screenshots__/
+.vitest-attachments/
