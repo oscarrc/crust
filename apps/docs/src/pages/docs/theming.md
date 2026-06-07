@@ -29,7 +29,7 @@ inherits from your page; Crust never loads a font.
 | ----------- | ---------- |
 | Surfaces    | `--crust-surface`, `--crust-ink`, `--crust-ink-muted`, `--crust-border`, `--crust-shadow` |
 | Semantics   | `--crust-success`, `--crust-error`, `--crust-info`, `--crust-warning` (icon strokes only) |
-| Shape       | `--crust-radius`, `--crust-width`, `--crust-offset`, `--crust-z` |
+| Shape       | `--crust-radius`, `--crust-width`, `--crust-msg-max-height`, `--crust-offset`, `--crust-z` |
 | Motion      | `--crust-ease`, `--crust-ease-exit`, `--crust-dur-in`, `--crust-dur-morph`, `--crust-dur-out` |
 
 Semantic color is deliberately confined to the icon strokes. Surfaces stay

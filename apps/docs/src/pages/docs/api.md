@@ -10,7 +10,9 @@ Everything lives behind two imports: `toast` to fire notifications and
 ## `toast(title, options?)`
 
 Fires a toast and returns its `id`. The `title` is the capsule text, always
-visible. A `message` is the body copy hidden behind the morph-expand.
+visible. A `message` is the body copy hidden behind the morph-expand; very
+long messages scroll inside the toast past `--crust-msg-max-height`
+(default `40vh`), the title staying put above.
 
 | Option        | Type                              | Default  | Notes                                            |
 | ------------- | --------------------------------- | -------- | ------------------------------------------------ |

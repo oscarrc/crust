@@ -23,6 +23,7 @@
   /* Shape & motion */
   --crust-radius: 10px;
   --crust-width: 360px;
+  --crust-msg-max-height: 40vh; /* long messages scroll past this */
   --crust-offset: 16px;
   --crust-z: 9999;
   --crust-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -59,10 +60,14 @@
 
 .crust-pos-bottom-right  { bottom: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
 .crust-pos-bottom-left   { bottom: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
-.crust-pos-bottom-center { bottom: var(--crust-offset); left: 50%; transform: translateX(-50%); align-items: center; }
 .crust-pos-top-right     { top: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
 .crust-pos-top-left      { top: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
-.crust-pos-top-center    { top: var(--crust-offset); left: 50%; transform: translateX(-50%); align-items: center; }
+
+/* Centered stacks pin both edges instead of left:50% + translateX(-50%):
+   a fixed element with only `left` set shrink-wraps to half the viewport,
+   and wide toasts got clipped by the cell's overflow on narrow screens. */
+.crust-pos-bottom-center { bottom: var(--crust-offset); left: var(--crust-offset); right: var(--crust-offset); align-items: center; }
+.crust-pos-top-center    { top: var(--crust-offset); left: var(--crust-offset); right: var(--crust-offset); align-items: center; }
 
 /* Cell: a grid row that grows from 0fr — stack reflow comes free ------ */
 
@@ -277,6 +282,31 @@
   line-height: 1.5;
   color: var(--crust-ink-muted);
   max-width: 65ch;
+  /* Long messages scroll inside the surface; the capsule (title) stays put. */
+  max-height: var(--crust-msg-max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--crust-border) transparent;
+}
+
+/* Safari has no scrollbar-color yet pre-18.2; Chrome ignores these when
+   scrollbar-width/color are set, so the two routes never fight. */
+.crust-msg::-webkit-scrollbar {
+  width: 6px;
+}
+
+.crust-msg::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.crust-msg::-webkit-scrollbar-thumb {
+  background: var(--crust-border);
+  border-radius: 3px;
+}
+
+.crust-msg::-webkit-scrollbar-thumb:hover {
+  background: var(--crust-ink-muted);
 }
 
 /* Reduced motion: a first-class theme, not a fallback ----------------- */
