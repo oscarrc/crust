@@ -1,32 +1,43 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/crust/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'packages/crust/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
 
 jobs:
-  verify:
+  changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      package: ${{ steps.filter.outputs.package }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
         with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build:lib
-      - run: pnpm test
-      - run: pnpm check:pkg
+          filters: |
+            shared: &shared
+              - 'packages/crust/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.github/workflows/**'
+            package:
+              - *shared
+            docs:
+              - *shared
+              - 'apps/docs/**'
+
+  test-package:
+    needs: changes
+    if: needs.changes.outputs.package == 'true'
+    uses: ./.github/workflows/test-package.yml
+
+  test-docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    uses: ./.github/workflows/test-docs.yml
