@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/oscarrc/crust/compare/crust-v0.1.0...crust-v0.2.0) (2026-06-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **crust:** `toast(message, { title })` is now `toast(title, { message })`. `Toast.title` is required and `Toast.message` optional; expandability is keyed on `message` instead of `title`, and `PromiseMessages` content objects are `{ title, message? }`.
+
+### Features
+
+* **crust:** add max height for toast messages and improve scrollbar styling ([94016b2](https://github.com/oscarrc/crust/commit/94016b2557fc4caeb9f51210ae1402547a124749))
+* **crust:** implement swipe-to-dismiss functionality for toast notifications ([0945d06](https://github.com/oscarrc/crust/commit/0945d06694a55193ca9b0f222828b0a851c2e161))
+* **crust:** make title the mandatory positional argument ([7b6e89c](https://github.com/oscarrc/crust/commit/7b6e89c4ab87a58b0775e42741ba9f8111fce0bc))
+
 ## 0.1.0 (2026-06-06)
 
 
