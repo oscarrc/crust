@@ -1,0 +1,21 @@
+name: Publish Package
+
+on: workflow_call
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:lib
+      # auth via npm trusted publishing (OIDC) — no token; provenance is automatic
+      - run: pnpm --filter @oscarrc/crust publish --access public --no-git-checks
