@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/oscarrc/crust/compare/crust-v0.2.0...crust-v0.2.1) (2026-06-08)
+
+
+### Bug Fixes
+
+* adjust toast shadow position and size ([6b2780b](https://github.com/oscarrc/crust/commit/6b2780bc690ac9042d5a22cd460c87ace7e4d607))
+
 ## [0.2.0](https://github.com/oscarrc/crust/compare/crust-v0.1.0...crust-v0.2.0) (2026-06-07)
 
 
