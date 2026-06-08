@@ -12,7 +12,7 @@
   --crust-border: oklch(0.89 0.01 75);
   --crust-shadow:
     0 1px 2px oklch(0.2 0.01 75 / 0.05),
-    0 6px 16px -4px oklch(0.2 0.01 75 / 0.1);
+    0 4px 10px -4px oklch(0.2 0.01 75 / 0.1);
 
   /* Semantic color lives only in the icons. */
   --crust-success: oklch(0.55 0.12 150);
@@ -47,8 +47,7 @@
     --crust-ink-muted: oklch(0.68 0.01 75);
     --crust-border: oklch(0.33 0.01 75);
     --crust-shadow:
-      0 1px 2px oklch(0 0 0 / 0.3),
-      0 6px 16px -4px oklch(0 0 0 / 0.45);
+      0 1px 2px oklch(0 0 0 / 0.3), 0 4px 10px -4px oklch(0 0 0 / 0.45);
     --crust-success: oklch(0.72 0.13 150);
     --crust-error: oklch(0.7 0.16 30);
     --crust-info: oklch(0.72 0.11 250);
@@ -58,16 +57,42 @@
 
 /* Positions ---------------------------------------------------------- */
 
-.crust-pos-bottom-right  { bottom: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
-.crust-pos-bottom-left   { bottom: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
-.crust-pos-top-right     { top: var(--crust-offset); right: var(--crust-offset); align-items: flex-end; }
-.crust-pos-top-left      { top: var(--crust-offset); left: var(--crust-offset); align-items: flex-start; }
+.crust-pos-bottom-right {
+  bottom: var(--crust-offset);
+  right: var(--crust-offset);
+  align-items: flex-end;
+}
+.crust-pos-bottom-left {
+  bottom: var(--crust-offset);
+  left: var(--crust-offset);
+  align-items: flex-start;
+}
+.crust-pos-top-right {
+  top: var(--crust-offset);
+  right: var(--crust-offset);
+  align-items: flex-end;
+}
+.crust-pos-top-left {
+  top: var(--crust-offset);
+  left: var(--crust-offset);
+  align-items: flex-start;
+}
 
 /* Centered stacks pin both edges instead of left:50% + translateX(-50%):
    a fixed element with only `left` set shrink-wraps to half the viewport,
    and wide toasts got clipped by the cell's overflow on narrow screens. */
-.crust-pos-bottom-center { bottom: var(--crust-offset); left: var(--crust-offset); right: var(--crust-offset); align-items: center; }
-.crust-pos-top-center    { top: var(--crust-offset); left: var(--crust-offset); right: var(--crust-offset); align-items: center; }
+.crust-pos-bottom-center {
+  bottom: var(--crust-offset);
+  left: var(--crust-offset);
+  right: var(--crust-offset);
+  align-items: center;
+}
+.crust-pos-top-center {
+  top: var(--crust-offset);
+  left: var(--crust-offset);
+  right: var(--crust-offset);
+  align-items: center;
+}
 
 /* Cell: a grid row that grows from 0fr — stack reflow comes free ------ */
 
@@ -91,16 +116,18 @@
   min-height: 0;
   overflow: hidden;
   display: flex;
-  /* Breathing room so the soft shadow isn't clipped; bottom edge doubles
-     as the stack gap. */
   padding: 8px 12px;
   margin: -4px -12px;
 }
 
 .crust-pos-bottom-right .crust-cell-inner,
-.crust-pos-top-right .crust-cell-inner { justify-content: flex-end; }
+.crust-pos-top-right .crust-cell-inner {
+  justify-content: flex-end;
+}
 .crust-pos-bottom-center .crust-cell-inner,
-.crust-pos-top-center .crust-cell-inner { justify-content: center; }
+.crust-pos-top-center .crust-cell-inner {
+  justify-content: center;
+}
 
 /* Swipe to dismiss: the pointer drags the cell inner (its overflow clip
    travels with it; the toast alone would be cut off at the cell edge).
@@ -203,11 +230,21 @@
   flex: none;
 }
 
-.crust-success .crust-icon { color: var(--crust-success); }
-.crust-error .crust-icon   { color: var(--crust-error); }
-.crust-info .crust-icon    { color: var(--crust-info); }
-.crust-warning .crust-icon { color: var(--crust-warning); }
-.crust-loading .crust-icon { color: var(--crust-ink-muted); }
+.crust-success .crust-icon {
+  color: var(--crust-success);
+}
+.crust-error .crust-icon {
+  color: var(--crust-error);
+}
+.crust-info .crust-icon {
+  color: var(--crust-info);
+}
+.crust-warning .crust-icon {
+  color: var(--crust-warning);
+}
+.crust-loading .crust-icon {
+  color: var(--crust-ink-muted);
+}
 
 /* Loading: the arc spins; an essential status indicator, so it keeps
    spinning under reduced motion too. */
@@ -216,7 +253,9 @@
 }
 
 @keyframes crust-rotate {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Stroke draw-in: capsule lands first, then the mark draws itself. */
@@ -227,7 +266,9 @@
 }
 
 @keyframes crust-draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .crust-title {
@@ -257,7 +298,9 @@
   color: var(--crust-ink-muted);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 150ms var(--crust-ease), background-color 150ms var(--crust-ease);
+  transition:
+    opacity 150ms var(--crust-ease),
+    background-color 150ms var(--crust-ease);
 }
 
 .crust-toast:hover .crust-dismiss,
