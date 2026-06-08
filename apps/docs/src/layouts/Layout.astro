@@ -38,6 +38,13 @@ const socialIcons = import.meta.glob<{ default: typeof GitHubIcon }>(
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms-full.txt"
+      title="LLMs Full"
+    />
     <Font cssVariable="--font-young-serif" preload />
     <Font cssVariable="--font-hanken" preload />
     <Font cssVariable="--font-fragment-mono" />

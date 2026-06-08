@@ -1,0 +1,134 @@
+# Crust
+
+Website: https://crust.oscarrc.me
+Documentation: https://crust.oscarrc.me/docs
+Repository: https://github.com/oscarrc/crust
+
+## Copy-Paste Recipes
+
+### Install
+
+pnpm add @oscarrc/crust
+
+### Import Styles
+
+import '@oscarrc/crust/styles.css';
+
+### Astro Setup
+
+import { mountToaster } from '@oscarrc/crust/vanilla';
+
+mountToaster();
+
+### Show Toast
+
+import { toast } from '@oscarrc/crust/vanilla';
+
+toast.success('Saved');
+
+### React Setup
+
+import { Toaster } from '@oscarrc/crust/react';
+
+function App() {
+  return (
+    <>
+      <Toaster />
+    </>
+  );
+}
+
+### Promise Toast
+
+toast.promise(saveDraft(), {
+  loading: 'Saving...',
+  success: 'Saved',
+  error: 'Failed'
+});
+
+### Update Existing Toast
+
+const id = toast.loading('Uploading...');
+
+toast.update(id, {
+  title: 'Uploaded',
+  type: 'success'
+});
+
+## Overview
+
+Crust is an Astro-first toast notification library built around a shared store, a vanilla DOM renderer, and optional React bindings.
+
+## Core APIs
+
+toast()
+toast.success()
+toast.error()
+toast.info()
+toast.warning()
+toast.loading()
+toast.update()
+toast.dismiss()
+toast.promise()
+mountToaster()
+toastStore
+useToasts()
+Toaster
+
+## Type Reference
+
+### ToastOptions
+
+interface ToastOptions {
+  message?: string;
+  type?: 'default' | 'success' | 'error' | 'info' | 'warning' | 'loading';
+  duration?: number;
+  icon?: string | Element | (() => Element) | null;
+  expanded?: boolean;
+  expandAfter?: number;
+}
+
+### MountToasterOptions
+
+interface MountToasterOptions {
+  position?: Position;
+  icons?: IconMap;
+  maxVisible?: number;
+}
+
+### Position
+
+'top-left'
+'top-center'
+'top-right'
+'bottom-left'
+'bottom-center'
+'bottom-right'
+
+## Theming
+
+Use CSS custom properties rather than editing library styles directly.
+
+Categories:
+
+- Surface variables
+- Semantic state colors
+- Shape variables
+- Motion variables
+
+## Accessibility
+
+- aria-live announcements
+- keyboard dismiss support
+- focus-aware timers
+- reduced motion support
+
+## Guidance For AI Agents
+
+- Prefer mountToaster() for Astro and vanilla projects.
+- Prefer <Toaster /> only for React applications.
+- Always import '@oscarrc/crust/styles.css'.
+- Prefer toast.promise() for async workflows.
+- Use toast.update() for manual state transitions.
+- Use CSS variables for theming.
+- Do not generate JSX toast content.

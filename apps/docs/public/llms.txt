@@ -1,0 +1,88 @@
+# Crust
+
+> An Astro-first toast library with a vanilla DOM renderer and optional React integration.
+
+Website:
+https://crust.oscarrc.me
+
+Documentation:
+https://crust.oscarrc.me/docs
+
+API Reference:
+https://crust.oscarrc.me/docs/api
+
+Theming:
+https://crust.oscarrc.me/docs/theming
+
+Repository:
+https://github.com/oscarrc/crust
+
+## Quick Start
+
+Install:
+
+pnpm add @oscarrc/crust
+
+Import styles:
+
+import '@oscarrc/crust/styles.css';
+
+### Vanilla / Astro
+
+import { mountToaster, toast } from '@oscarrc/crust/vanilla';
+
+mountToaster();
+
+toast.success('Saved');
+
+### React
+
+import { Toaster } from '@oscarrc/crust/react';
+
+function App() {
+  return (
+    <>
+      <Toaster />
+    </>
+  );
+}
+
+### Promise Toast
+
+toast.promise(saveDraft(), {
+  loading: 'Saving...',
+  success: 'Saved',
+  error: 'Failed'
+});
+
+## Core Concepts
+
+- Shared global toast store
+- Vanilla DOM renderer
+- Astro-first architecture
+- Optional React adapter
+- Morph-expand interaction model
+- Queue-based visibility management
+- Accessibility-first defaults
+- Reduced-motion support
+- View-transition persistence
+
+## Main APIs
+
+- toast()
+- toast.success()
+- toast.error()
+- toast.info()
+- toast.warning()
+- toast.loading()
+- toast.update()
+- toast.dismiss()
+- toast.promise()
+- mountToaster()
+- toastStore
+- useToasts()
+- Toaster
+
+## Additional Resource
+
+- https://crust.oscarrc.me/llms-full.txt
