@@ -8,6 +8,15 @@ on:
 
 jobs:
   changes:
+    # Skip CI on release-please's release merges — release.yml owns testing and
+    # deploy for those, and the version bump + CHANGELOG would otherwise trip the
+    # packages/crust/** filter. Covers both merge-commit (branch name in the merge
+    # message) and squash (the "chore(...): release" PR title) strategies.
+    # Non-push events (PRs) have no head_commit, so the guard is a no-op there.
+    if: >-
+      ${{ github.event_name != 'push'
+          || (!contains(github.event.head_commit.message, 'release-please--branches')
+              && !startsWith(github.event.head_commit.message, 'chore(main): release')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
